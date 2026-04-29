@@ -1,0 +1,81 @@
+Remove the Old Git History:
+cd /path/to/your/project
+rm -rf .git
+
+Initial Workflow:
+Initialize a brand new Git repo
+cd /path/to/your/project
+git init
+
+Create a .gitignore File
+vi .gitignore
+__pycache__/
+*.pyc
+*.pyo
+.idea/
+venv/
+env/
+.env
+node_modules/
+*.log
+alembic/versions/
+cache/
+data/
+dump/
+images/
+logs/
+spools/
+temp/
+src/static/dist/
+
+Add All Your Files
+git add .
+
+Verify What Was Added
+git status
+
+Set Your Name and Email
+git config --global user.name "Your Name"
+git config --global user.email "your@email.com"
+
+Commit Your Files
+git commit -m "Initial commit"
+
+Push GitHub
+Link to GitHub
+# get url from github.com
+git remote add origin putyourgiturlhere
+
+Push to GitHub
+git push -u origin master
+
+Get Your Personal Access Token from github
+use the PAT as password
+
+
+CLI Daily Workflow:
+# Check what changed
+git status
+
+# Add changes
+git add .
+
+# Commit with a message
+git commit -m "Describe what you changed"
+
+# Push to GitHub
+git push
+
+PyCharm Daily Workflow:
+Commit
+Push
+
+Remove File but KEEP it on Your PC
+git rm --cached filename.txt
+git rm --cached -r directoryname/
+
+Remove File AND Delete it Locally
+git rm filename.txt
+
+Undo the Last Commit (Keep Files Safe):
+git reset --soft HEAD~1
