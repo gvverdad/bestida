@@ -1,0 +1,12 @@
+in src/static
+
+1. npm init - will  create package.json
+2. first "npm install" will create the node_modules directory in your current directory
+3. npm install will update the package.json files
+4. npm uninstall package-name
+5. to install in devDependencies: npm install --save-dev package-name
+
+To fix the dependency tree, try following the steps below in the exact order:
+  1. Delete package-lock.json (not package.json!) and/or yarn.lock in your project folder.
+  2. Delete node_modules in your project folder.
+  3. Run npm install or yarn, depending on the package manager you use.

@@ -1,0 +1,21 @@
+{% extends "./base.html" %}
+
+{% block header_scripts %}
+    <script src="{{ url_for('static', path='/dist/app.bundle.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <div data-minimal class="flex-1 flex flex-col overflow-hidden">
+        <header class="navbar bg-primary text-primary-content flex justify-between items-center">
+            <a class="btn btn-ghost normal-case text-xl">{{ APP_TITLE }}</a>
+        </header>
+        <ui-toaster data-toaster></ui-toaster>
+        <main class="flex flex-row justify-center items-center h-full w-full overflow-x-hidden overflow-y-auto bg-cover bg-center bg-no-repeat"
+            style="background-image: linear-gradient(rgba(52, 58, 64, 0.9), rgba(52, 58, 64, 0.9)), url('/static/images/background_minimal.jpg')">
+
+            {% block children %}
+            {% endblock %}
+        </main>
+    </div>
+
+{% endblock %}

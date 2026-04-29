@@ -1,0 +1,14 @@
+ubuntu
+ModuleNotFoundError: No module named 'distutils.util'
+
+sudo apt-get install python3-distutils
+
+sudo apt-get install python3-apt
+
+
+create requirements.txt
+pip freeze -l > requirements.txt
+
+
+to force reinstall from requirements.txt
+pip install --force-reinstall -r requirements.txt

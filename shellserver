@@ -1,0 +1,45 @@
+#!/home/gvv/Projects/bestida/venv/bin/python
+
+import importlib
+import sys
+import re
+from configparser import ConfigParser, ExtendedInterpolation
+
+
+class ShellApp:
+    def __init__(self, config=None, **kwargs):
+        self.config = config
+
+    def include(self, module):
+        getattr(importlib.import_module(module), "include_me")(self, self.config)
+
+
+def usage(argv):
+    print('usage: shellserver <script> <config_uri>\n'
+          '(example: "shellserver src.shell.program_name development.ini")\n'
+          'script should have a run method')
+    sys.exit(1)
+
+
+def run(argv=sys.argv):
+    if len(argv) != 3:
+        usage(argv)
+
+    config = None
+    try:
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read_file(open(argv[2]))
+    except:
+        usage(argv)
+
+    app = ShellApp(config=config)
+    app.include("src.config")
+    app.include("src.db")
+
+    run_obj = importlib.import_module(argv[1])
+    run_obj.run(app)
+
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+    sys.exit(run())

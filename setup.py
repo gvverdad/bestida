@@ -1,0 +1,35 @@
+from setuptools import setup
+
+setup(
+    name='bestida',
+    version='0.1.0',
+    packages=['src.db', 'src.db.models', 'src.db.models.app',
+              'src.db.models.app.accounts', 'src.db.models.app.fgstocks',
+              'src.db.models.person', 'src.db.models.system', 'src.db.models.address', 'src.db.models.company',
+              'src.db.models.security', 'src.db.scripts', 'src.api', 'src.api.v1', 'src.api.v1.endpoints',
+              'src.api.v1.endpoints.form', 'src.api.v1.endpoints.grid', 'src.api.v1.endpoints.menu',
+              'src.api.v1.endpoints.model', 'src.api.v1.endpoints.pages', 'src.api.v1.endpoints.pages.home',
+              'src.api.v1.endpoints.pages.purge', 'src.api.v1.endpoints.pages.purge.spooler',
+              'src.api.v1.endpoints.pages.purge.jobqueue', 'src.api.v1.endpoints.pages.purge.workfiles',
+              'src.api.v1.endpoints.pages.purge.notification', 'src.api.v1.endpoints.pages.locale',
+              'src.api.v1.endpoints.pages.profile', 'src.api.v1.endpoints.pages.release',
+              'src.api.v1.endpoints.pages.release.export', 'src.api.v1.endpoints.pages.release.import',
+              'src.api.v1.endpoints.pages.spooler', 'src.api.v1.endpoints.pages.database',
+              'src.api.v1.endpoints.pages.jobqueue', 'src.api.v1.endpoints.pages.launcher',
+              'src.api.v1.endpoints.pages.timezone', 'src.api.v1.endpoints.pages.bookmarks',
+              'src.api.v1.endpoints.pages.spoolviewer', 'src.api.v1.endpoints.pages.changecompany',
+              'src.api.v1.endpoints.pages.notifications', 'src.api.v1.endpoints.pages.changepassword',
+              'src.api.v1.endpoints.pages.copycompanydata',
+              'src.api.v1.endpoints.script','src.api.v1.endpoints.system', 'src.api.v1.endpoints.security',
+              'src.api.v1.endpoints.datasource','src.cache', 'src.shell', 'src.tasks', 'src.tasks.app', 'src.tasks.system',
+              'src.tasks.system.jobq','src.tasks.system.export', 'src.tasks.system.import', 'src.tasks.system.spooler',
+              'src.tasks.system.workfile', 'src.tasks.system.companies', 'src.tasks.system.notification', 'src.utils',
+              'src.utils.app', 'src.config', 'src.server', 'src.server.jobq', 'src.schemas', 'src.schemas.app', 'src.security',
+              'src.services', 'src.middleware'],
+    include_package_data=True,  # Ensure MANIFEST.in is used
+    url='',
+    license='',
+    author='gvv',
+    author_email='',
+    description='Bestida'
+)

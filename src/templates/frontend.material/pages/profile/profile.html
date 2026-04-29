@@ -1,0 +1,44 @@
+<div data-title="Profile"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Edit Profile"
+            data='{{ personal | tojson(indent=2) }}'
+            mode="Update"
+            submit-post-update-handler="afterSubmitProfile"
+            row-id="{{ rowid }}"
+            db-table="Persons"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Personal"
+                data-panel=""
+                active-page
+            >
+                {% include "./pages/profile/personal.html" %}
+            </ui-step>
+            <ui-step
+                step-title="Addresses"
+                data-panel="Addresses"
+            >
+                {% include "./pages/profile/addresses.html" %}
+            </ui-step>
+            <ui-step
+                step-title="Phones"
+                data-panel="Phones"
+            >
+                {% include "./pages/profile/phones.html" %}
+            </ui-step>
+            <ui-step
+                step-title="Emails"
+                data-panel="Emails"
+            >
+                {% include "./pages/profile/emails.html" %}
+            </ui-step>
+        </ui-stepper>
+</div>
+<script>
+    function afterSubmitProfile(event, data) {
+        // user is globally defined in web component (ui-stepper) stepper.js
+        user.setup();
+    }
+</script>

@@ -1,0 +1,40 @@
+include *.txt *.ini
+include appserver
+include shellserver
+include __init__.py
+include release/Initial.json
+include alembic/__init__.py
+include alembic/env.py
+include alembic/README
+include alembic/script.py.mako
+include alembic/versions/.empty
+include cache/.empty
+include data/.empty
+include dump/.empty
+include logs/.empty
+include temp/.empty
+include src __init__.py
+include src/api/v1/endpoints/app/.empty
+include src/static/.babelrc
+include src/static/manifest.json
+include src/static/package.json
+include src/static/package-lock.json
+include src/static/tailwind.config.js
+include src/static/webpack.config.js
+include src/static/js/app/.empty
+include src/static/scripts/app/documents/.empty
+include src/static/scripts/system/documents/.empty
+include src/static/spool/.empty
+include src/templates/frontend/app/.empty
+include src/templates/reports/app/.empty
+recursive-include src/static/3rd/js/html2pdf *
+recursive-include src/static/3rd/js/pdfjs-2.5.207-dist *
+recursive-include src/static/css *.css *.js
+recursive-include src/static/icons *.js *.svg
+recursive-include src/static/images *.png *.jpg *.ico
+recursive-include src/static/js *.js
+recursive-include src/static/scripts *.js
+recursive-include src/static/tailwindcss *.css
+recursive-include src/templates *.html *.jinja2
+recursive-include src/templates/static *
+

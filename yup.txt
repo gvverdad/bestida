@@ -1,0 +1,4 @@
+use yup <= 0.32.11
+
+yup 1.+
+TypeError: type o is not a function in .when()

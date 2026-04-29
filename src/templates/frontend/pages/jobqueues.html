@@ -1,0 +1,45 @@
+<div data-title="Job Queue"
+     class="flex flex-col justify-center items-center w-full h-full">
+
+    <ui-datatable
+        grid-title="Job Queue"
+        db-table="Tasks"
+        program="JobQueues"
+
+        update-button delete-button filter-button
+        column-button refresh-button auto-refresh-button
+        download-button print-button
+
+        post-data-url="/jobqueuedata"
+        get-schema-url="/jobqueuegridschema"
+
+        update-form="jobQUpdateForm"
+    ></ui-datatable>
+</div>
+<script>
+    function jobQUpdateForm(container, data, table) {
+        // table is datatable "this" context
+        // api globally defined in view.js
+        const component = document.createElement("ui-form");
+        component.ownerId = table.instanceId;
+        component.title = "Update Task";
+        component.dbTable = "Tasks";
+        component.rowId = data.Id;
+        component.formData = data;
+        component.mode = "Update";
+        component.formButtons = true;
+        component.submitText = "Update";
+        component.parentTable = table.parentTable;
+        component.parentField = table.parentField;
+        component.parentRowId = table.parentRowId;
+        component.parentRow = table.parentRow;
+        component.joinList = table.joinList;
+        component.program = `${table.program}.JobQueues`;
+        component.securityLevel = table.securityLevel;
+        component.ownerCancelHandler = true;
+        component.ownerSubmitPostPutHandler = true;
+        component.getSchemaHandler = () => api.GET("/jobqueueformschema", null);
+
+        container.addElement(component);
+    }
+</script>

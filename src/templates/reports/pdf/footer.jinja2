@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html {% block html_attribs %}{% endblock html_attribs %}>
+
+<head>
+    {%- block head %}
+    <title>{% block title %}{{title|default}}{% endblock title %}</title>
+
+    {%- block metas %}
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    {%- endblock metas %}
+
+    {%- block styles %}
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{TEMPLATE_LOCATION}}/static/css/bootstrap-3.3.7-dist/css/bootstrap.min.css" />
+    <!-- https://stackoverflow.com/questions/51315231/specify-font-in-python-pdfkit -->
+    <link rel="stylesheet" href="{{TEMPLATE_LOCATION}}/static/fonts/base64/stylesheet.css" />
+    {%- endblock styles %}
+
+    {%- block scripts %}
+    <script src="{{TEMPLATE_LOCATION}}/static/js/jquery-3.5.1.min.js"></script>
+    <script src="{{TEMPLATE_LOCATION}}/static/css/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script>
+        function substitutePdfVariables() {
+
+            function getParameterByName(name) {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            }
+
+            function substitute(name) {
+                var value = getParameterByName(name);
+                var elements = document.getElementsByClassName(name);
+
+                for (var i = 0; elements && i < elements.length; i++) {
+                    elements[i].textContent = value;
+                }
+            }
+
+            ['frompage', 'topage', 'page', 'webpage', 'section', 'subsection', 'subsubsection']
+                .forEach(function(param) {
+                    substitute(param);
+                });
+        }
+    </script>
+    {%- endblock scripts %}
+    {%- endblock head %}
+</head>
+
+<body {% block body_attribs %}onload="substitutePdfVariables(){% endblock body_attribs %}">
+
+{% block page_content -%}
+<footer>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-3" style="padding-left:0px;text-align:left;">
+                {{runDateTime | datetime_format(locale, timezone)}}
+            </div>
+            <div class="col-xs-6" style="text-align:center;">
+                {{opId}}  &nbsp; &nbsp; &nbsp; {{progId}}
+            </div>
+            <div class="col-xs-3" style="padding-right:0px;text-align:right;">
+                Page <span class="page"></span> of <span class="topage"></span>
+            </div>
+        </div>
+    </div>
+</footer>
+{%- endblock page_content %}
+
+</body>
+</html>
+

@@ -1,0 +1,3 @@
+UserWarning: Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.
+install tkinter through the Linux bash terminal using the following command:
+sudo apt-get install python3-tk

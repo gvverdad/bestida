@@ -1,0 +1,33 @@
+https://ezzeddinabdullah.com/post/fastapi-tailwind-sqlalchemy/
+
+1. pip install pytailwindcss
+2. in the Project directory (not src) run "tailwindcss"    (run to download the binaries)
+3. npm -i postcss
+4. run "tailwindcss init" to create "tailwind.config.js"
+5. instail daisyUI run "npm i -D daisyui@latest"
+    use npm i -D daisyui@3.9.4 (navbar text colour has changed in v4+)
+6. modify tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["src/templates/frontend/**/*.html"],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("daisyui")],
+  daisyui: {
+    themes: ["corporate", "dark"],
+  },
+}
+
+7. Create a new folder "tailwindcss" and inside that folder create a new file "tw.css" which should contain the following:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+8. run "tailwindcss -i tailwindcss/tw.css -o css/tw.css"
+
+9. during development run "tailwindcss -i tailwindcss/tw.css -o css/tw.css --watch"
+to constantly update src/static/css/main.css with any changes to your templates
+
+
+icons from https://heroicons.com/

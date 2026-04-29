@@ -1,0 +1,61 @@
+{% extends "./layout/minimal.html" %}
+
+{% block children %}
+    <div class="flex flex-col justify-center items-center w-full">
+        <h4 class="text-white text-4xl mb-5">{{ APP_TITLE }}</h4>
+        <div class="flex flex-col justify-center items-center">
+            <p class="text-white">George Verdad</p>
+            <p class="text-white">is Pogi</p>
+        </div>
+    </div>
+    <div class="flex flex-col justify-center items-center w-full">
+        <ui-form form-title="Sign In" action="/login" method="post"
+            initial-values='{"username": "", "password": "", "showtext": false, "rememberme": true }'
+            submit-text="Login"
+            form-button-submit
+        >
+            <ui-input label="Username" type="text"
+                name="username"
+                required="Username is a Required Field"
+                maxlength="64"
+                autofocus
+            ></ui-input>
+            <ui-input label="Password" type="password"
+                name="password"
+                maxlength="128"
+                required="Password is a Required Field"
+                data-password
+            ></ui-input>
+            <div class="flex flex-row flex-wrap gap-x-10">
+                <div class="form-control w-auto">
+                    <label class="cursor-pointer label font-medium">
+                        <input type="checkbox" id="showtext" name="showtext"
+                               class="toggle toggle-sm toggle-primary me-1 focus:outline-none focus:border-primary"
+                               onclick="showPassword()"
+                        />
+                        <span class="label-text">Show Text</span>
+                    </label>
+                </div>
+            </div>
+        </ui-form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function showPassword() {
+            document.querySelectorAll("[data-password]").forEach(ele => {
+                if(ele.type === "password") {
+                    ele.type = "text";
+                } else {
+                    ele.type = "password";
+                }
+                ele.focus();
+            });
+        }
+{% if message %}
+        const toaster = document.querySelector("[data-toaster]");
+        toaster.show("{{ message }}", "error");
+{% endif %}
+    </script>
+{% endblock %}

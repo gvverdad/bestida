@@ -1,0 +1,21 @@
+<div data-title="Bookmarks"
+     class="flex flex-col justify-center items-center w-full h-full">
+    <ui-datatable
+        grid-title="Bookmarks"
+        db-table="Bookmarks"
+        program="Bookmarks"
+        post-submit-handler="refreshBookmarks"
+        update-button delete-button filter-button
+        column-button refresh-button auto-refresh-button
+        download-button print-button
+    ></ui-datatable>
+</div>
+<script>
+    function refreshBookmarks(event) {
+        event.preventDefault();
+
+        // defined globally in web-component (ui-datatable) datatable.js
+        // menu
+        menu.refreshBookmarks();
+    }
+</script>

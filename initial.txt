@@ -1,0 +1,52 @@
+Initial setup
+
+to force reinstall from requirements.txt
+pip install --force-reinstall -r requirements.txt
+
+Initial login:
+login: root
+password: administrator
+
+Before Initial Run
+1. src.db.models.security.Users.py
+    remove "nullable=False" in fields Company_Id and Role_Id
+
+2. src.db.__init__.py
+    CANNOT use a Table Class Named "Transaction" - used by SQLAlchemy-continuum
+    comment out "make_versioned"
+
+3.  create images
+    src/static/images/404.png
+    src/static/images/apple_touch_icon.png
+    src/static/background_main.jpg
+    src/static/background_minimal.jpg
+    src/static/images/favicon.ico
+
+4.  modify development.ini
+
+5.  change appserver and shellserver shebang line python path
+
+6.  install npm packages
+
+7.  npm run build   and   npm run dev_css
+
+After Initial Run
+1. src.db.models.security.Users.py
+    restore "nullable=False" in fields Company_Id and Role_Id
+
+2. src.db.__init__.py
+    uncomment "make_versioned"
+
+3. run alembic
+    1. mod alembic.ini and alembic/env.py
+    2. alembic upgrade head
+    3. alembic revision --autogenerate -m "history"
+    4. edit alembic history script - sa.Enum(..." lines
+        // https://stackoverflow.com/questions/63461381/how-to-use-an-existing-sqlalchemy-enum-in-an-alembic-migration-postgres
+        from sqlalchemy.dialects import postgresql
+        rename sa.Enum to postgresql.ENUM
+        remove enum items and leave name + create_type=False
+        ie: postgresql.ENUM(name='ProgramType', create_type=False)
+    5. alembic upgrade head
+
+4.  run Import Release Tables in the app

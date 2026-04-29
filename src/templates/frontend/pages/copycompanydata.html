@@ -1,0 +1,47 @@
+<div data-title="Copy Company Data"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Copy Company Data"
+            db-table="Tasks"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Ruleset"
+                data-panel=""
+            >
+                <ui-form
+                    form-title="Copy Company Data Ruleset"
+                >
+                    <ui-input type="hidden" name="Title"
+                        value="Copy Company Data"
+                    ></ui-input>
+                    <ui-combobox label="From Company"
+                        name="Params.fromcompany"
+                        required="From Company is a Required Field"
+                        value="{{ company }}"
+                        choices='{{ companies | tojson(indent=2) }}'
+                        autofocus
+                    ></ui-combobox>
+                    <ui-combobox label="To Company"
+                        name="Params.tocompany"
+                        required="To Company is a Required Field"
+                        validators='["NotEqualTo"]'
+                        validator-fields='[{"NotEqualTo":"Params.fromcompany"}]'
+                        validator-messages='[{"NotEqualTo":"To Company is equal to From Company"}]'
+                        choices='{{ companies | tojson(indent=2) }}'
+                    ></ui-combobox>
+                </ui-form>
+            </ui-step>
+            <ui-step
+                step-title="Task"
+                data-panel=""
+            >
+                <ui-submittaskform
+                    runscript="tasks.system.companies.copycompanydata.CopyCompanyData"
+                    program-name="CopyCompanyData"
+                    program-type="Script"
+                 >
+                 </ui-submittaskform>
+            </ui-step>
+        </ui-stepper>
+</div>

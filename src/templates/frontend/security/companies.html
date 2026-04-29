@@ -1,0 +1,15 @@
+<div data-title="Companies"
+     class="flex flex-col justify-center items-center w-full h-full">
+
+    <ui-datatable
+        grid-title="Companies"
+        db-table="Companies"
+        program="GridCompanies"
+
+        add-button copy-button update-button delete-button filter-button
+        column-button refresh-button auto-refresh-button
+        download-button print-button
+
+        post-data-url="/companiesdata"
+    ></ui-datatable>
+</div>

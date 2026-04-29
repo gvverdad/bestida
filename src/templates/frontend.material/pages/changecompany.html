@@ -1,0 +1,24 @@
+<div data-title="Change Company"
+     class="flex flex-col justify-center items-center w-fit h-full overflow-y-auto">
+    <ui-form form-title="Change Company" action="/changecompany" method="put"
+        initial-values='{"company": "{{ company }}" }'
+        submit-post-put-handler="afterSubmitChangeCompany"
+        form-buttons
+    >
+        <ui-combobox label="Company" placeholder=" "
+            name="company"
+            required="Company is a Required Field"
+            autofocus
+            choices='{{ companies | tojson(indent=2) }}'
+        ></ui-combobox>
+    </ui-form>
+</div>
+<script>
+    function afterSubmitChangeCompany(event, data) {
+        // user is globally defined in web component (ui-form) form.js
+        user.setup();
+
+        // closePage is globally defined in web component (ui-form) form.js
+        closePage();
+    }
+</script>

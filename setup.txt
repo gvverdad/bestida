@@ -1,0 +1,22 @@
+build source distribution (sdist), binary distribution .whl (bdist_wheel)
+
+setup files:
+setup.py
+MANIFEST.in
+
+To include empty directories, create a dummy file .empty in that directory
+and include it in the MANIFEST.in
+
+cli:
+python setup.py sdist   # sdist only
+python setup.py sdist bdist_wheel  # sdist and bdist_wheel
+
+output files:
+build directory   # for bdist_wheel
+dist directory
+appname.egg-info directory
+
+
+install source distribution (sdist)
+1. copy dist/appname.tar.gz to another directory
+2. tar --strip-components=1 -xvzf appname.tar.gz  # strip the root folder

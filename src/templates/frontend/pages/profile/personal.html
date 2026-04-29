@@ -1,0 +1,43 @@
+<ui-form>
+    <ui-combobox label="Title" placeholder=" "
+        name="Title"
+        required="Title is a Required Field"
+        autofocus
+        selectTable="PersonTitles"
+        selectId="Id"
+        selectKey="Description"
+    ></ui-combobox>
+    <ui-input label="First Name" type="text" placeholder=" "
+        name="FirstName"
+        maxlength="128"
+    ></ui-input>
+    <ui-input label="Middle Name" type="text" placeholder=" "
+        name="MiddleName"
+        maxlength="128"
+    ></ui-input>
+    <ui-input label="Last Name" type="text" placeholder=" "
+        name="LastName"
+        maxlength="128"
+        required="Last Name is a Required Field"
+    ></ui-input>
+    <ui-input label="Decorations" type="text" placeholder=" "
+        name="Decorations"
+        maxlength="16"
+    ></ui-input>
+    <ui-combobox label="Gender" placeholder=" "
+        name="Gender"
+        required="Gender is a Required Field"
+        selectTable="PersonGenders"
+        selectId="Id"
+        selectKey="Description"
+    ></ui-combobox>
+    <ui-datetime label="Birthday"
+        field-type="Date"
+        name="Birthday"
+    ></ui-datetime>
+    <ui-input label="Gravatar Id" type="email" placeholder=" "
+        name="GravatarId"
+        email-message="Invalid Email"
+        maxlength="128"
+    ></ui-input>
+</ui-form>

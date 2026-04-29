@@ -1,0 +1,24 @@
+<div data-title="Set Timezone"
+     class="flex flex-col justify-center items-center w-fit h-full overflow-y-auto">
+    <ui-form form-title="Set Timezone" action="/settimezone" method="put"
+        initial-values='{"timezone": "{{ timezone }}" }'
+        submit-post-put-handler="afterSubmitTimezone"
+        form-buttons
+    >
+        <ui-combobox label="Timezone" placeholder=" "
+            name="timezone"
+            required="Timezone is a Required Field"
+            autofocus
+            choices='{{ timezones | tojson(indent=2) }}'
+        ></ui-combobox>
+    </ui-form>
+</div>
+<script>
+    function afterSubmitTimezone(event, data) {
+        // user is globally defined in view.js
+        user.setup();
+
+        // closePage is globally defined in view.js
+        closePage();
+    }
+</script>

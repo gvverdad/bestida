@@ -1,0 +1,1225 @@
+import { LitElement, html, css, render } from 'lit'
+import { TWStyles } from '../../../css/tw.js'
+
+import store from "../../store"
+
+import { get, isEmpty, isNull, isNil, isString, isArray, isObject, isFunction } from "../../utils"
+
+import "../../../icons/check.js"
+import "../../../icons/x.js"
+import "../../../icons/chevronup.js"
+import "../../../icons/chevrondown.js"
+import "../../../icons/arrowup.js"
+import "../../../icons/arrowdown.js"
+
+import { buildField } from "../form/fieldbuilder.js"
+
+export function createSubTables(row, panelTable, gridTables, gridColumns,
+                                preSubTables, postSubTables,
+                                tabSelect, program, datatableId, securityLevel,
+                                gridFlags, gridOptions, programStack, owner) {
+
+    const subs = [];
+    if(preSubTables) {
+        preSubTables.forEach(component => {
+            let isOK = true;
+            if(component.program) {
+                if(programStack.includes(component.program)) {
+                    isOK = false;
+                } else {
+                    programStack.push(component.program);
+                }
+            }
+            if(isOK) {
+                subs.push({
+                    "type":"component", "element": component.element,
+                    "title": component.title
+                });
+            }
+        });
+    }
+    if(!isEmpty(panelTable) && gridTables) {
+        gridTables.forEach(table => {
+            if(table.table !== panelTable) {
+                subs.push({
+                    "type":"table", "element": table,
+                    "title": table.desc || table.label,
+                    "subType": table.gridSubTableType
+                });
+            }
+        });
+    }
+    if(gridTables && gridTables[0].subTables) {
+        gridTables[0].subTables.forEach(sub_table => {
+            let filter = [];
+            let isOK = true;
+            if(sub_table.params) {
+                isOK = false;
+                for(const [key, value] of Object.entries(sub_table.params)) {
+                    let val = get(row, value, null);
+                    if(isNull(val) && owner) {
+                        val = owner.requestForValue(value);
+                    }
+                    if(!isNull(val)) {
+                        filter.push({ "field": key, "op": "=", "value": val });
+                        isOK = true;
+                    }
+                }
+            }
+            if(isOK) {
+                subs.push({
+                    "type":"table",
+                    "element": {
+                        "table": sub_table.table,
+                        "join_list": null,
+                        "parent": null,
+                        "field_list": null,
+                        "filter": filter
+                    },
+                    "title": sub_table.title,
+                    "subType": sub_table.type
+                });
+            }
+        });
+    }
+
+    if(postSubTables) {
+        postSubTables.forEach(component => {
+            let isOK = true;
+            if(component.program) {
+                if(programStack.includes(component.program)) {
+                    isOK = false;
+                } else {
+                    programStack.push(component.program);
+                }
+            }
+            if(isOK) {
+                subs.push({
+                    "type":"component", "element": component.element,
+                    "title": component.title
+                });
+            }
+        });
+    }
+
+    // field documents
+    if(gridColumns) {
+        gridColumns.forEach(ele => {
+            if(ele.options.display && ele.documents && ele.documents.length) {
+                ele.documents.forEach(doc => {
+                    let props = null;
+                    let isOK = true;
+                    if(doc.params) {
+                        isOK = false;
+                        const params = {};
+                        for(const [key, value] of Object.entries(doc.params)) {
+                            let val = null;
+                            if(value === ".") {
+                                val = get(row, ele.name, null);
+                            } else {
+                                val = get(row, value, null);
+                                if(isNull(val) && owner) {
+                                    val = owner.requestForValue(value);
+                                }
+                            }
+                            if(!isNull(val)) params[key] = val;
+                        };
+                        if(!isEmpty(params)) {
+                            props = params;
+                            isOK = true;
+                        }
+                    }
+                    if(doc.program) {
+                        if(programStack.includes(doc.program)) {
+                            isOK = false;
+                        } else {
+                            programStack.push(doc.program);
+                        }
+                    }
+                    if(isOK) {
+                        subs.push({
+                            "type": "document", "element": doc,
+                            "title": doc.title || ele.column_label,
+                            "name": ele.name,
+                            "props": props
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // table documents
+    if(gridTables && gridTables[0].documents) {
+        gridTables[0].documents.forEach(doc => {
+            let props = null;
+            let isOK = true;
+            if(doc.params) {
+                isOK = false;
+                const params = {};
+                for(const [key, value] of Object.entries(doc.params)) {
+                    let val = get(row, value, null);
+                    if(isNull(val) && owner) {
+                        val = owner.requestForValue(value);
+                    }
+                    if(!isNull(val)) params[key] = val;
+                };
+                if(!isEmpty(params)) {
+                    props = params;
+                    isOK = true;
+                }
+            }
+            if(programStack.includes(doc.program)) {
+                isOK = false;
+            } else {
+                programStack.push(doc.program);
+            }
+            if(isOK) {
+                subs.push({
+                    "type": "document", "element": doc,
+                    "title": doc.title,
+                    "props": props
+                });
+            }
+        });
+    }
+    if(subs.length === 1) {
+        return createDocument(subs[0], row, program, datatableId, securityLevel,
+                              gridFlags, gridOptions, programStack);
+    } else if(subs.length > 1) {
+        if(tabSelect > subs.length) tabSelect = 0;
+
+        let cont = `<ui-tabs owner-id="${datatableId}" selected-index="${tabSelect}">`;
+        subs.forEach((ele, index) => {
+            cont += `<ui-tab tab-title="${ele.title}">`;
+            cont += createDocument(ele, row, program, datatableId, securityLevel,
+                                   gridFlags, gridOptions, programStack);
+            cont += "</ui-tab>";
+        })
+        cont +=  "</ui-tabs>";
+        return cont;
+    }
+    return null;
+}
+
+function createDocument(element, row, program, datatableId, securityLevel,
+                        gridFlags, gridOptions, programStack) {
+    let row_id = row.Id;
+    program = `${program}.${element.element.table}`;
+
+    switch(element.type) {
+        case "document":
+            let props = null;
+            if(element.props) {
+                props = JSON.stringify(element.props);
+            }
+            return `
+                <ui-document
+                    owner-id="${datatableId}"
+                    program="${element.element.program}"
+                    label="${element.title}"
+                    program-stack='${JSON.stringify(programStack)}'
+                    ${props ? `params='${props}'` : ""}
+                ></ui-document>
+            `;
+        case "component":
+            if(isFunction(element.element)) {
+                return element.element(row);
+            }
+            return element.element; // html
+        default: // table
+            const sec_level = JSON.stringify(securityLevel);
+            const line = JSON.stringify(row).replace(/'/g, "&#39;"); // escape single quotes for JSON
+            const join_list = JSON.stringify(element.element.join_list);
+
+            if(element.subType === "FORM") {
+                let mode = "Delete";  // view only
+                let submitButton = false;
+                if(store.get("user.Role.UpdateLevel") >= securityLevel.updateLevel) {
+                    mode = "Update";
+                    submitButton = true;
+                }
+
+                const record = get(row, element.element.field_list, null);
+                return `
+                    <ui-form
+                        owner-id="${datatableId}"
+                        mode="${mode}"
+                        db-table="${element.element.table}"
+                        program="${program}"
+                        form-title="${element.element.desc}"
+
+                        parent-table="${element.element.parent ?? ''}"
+                        parent-field="${element.element.field_list ?? ''}"
+                        parent-row-id="${row_id}"
+
+                        security-level='${sec_level}'
+                        parent-row='${line}'
+                        join-list='${join_list}'
+
+                        row-id="${record ? record.Id : null}"
+
+                        refresh-after-submit
+                        ${submitButton ? "form-button-submit" : ""}
+                    ></ui-form>
+                `;
+            } else { // subType === "GRID"
+                const grid_options = gridOptions ? JSON.stringify(gridOptions) : null;
+
+                if(isNil(element.element.parent))
+                    return `
+                        <ui-datatable
+                            owner-id="${datatableId}"
+                            grid-title="${element.title}"
+                            db-table="${element.element.table}"
+                            program="${program}"
+                            program-stack='${JSON.stringify(programStack)}'
+                            get-data-filter='${JSON.stringify(element.element.filter)}'
+                            security-level='${sec_level}'
+
+                            ${gridFlags.localData ? "local-data" : ""}
+                            ${gridFlags.uploadImageButton ? "upload-image-button" : ""}
+                            ${gridFlags.addButton ? "add-button" : ""}
+                            ${gridFlags.copyButton ? "copy-button" : ""}
+                            ${gridFlags.updateButton ? "update-button" : ""}
+                            ${gridFlags.deleteButton ? "delete-button" : ""}
+                            ${gridFlags.filterButton && isEmpty(element.element.filter) ? "filter-button" : ""}
+                            ${gridFlags.columnButton ? "column-button" : ""}
+                            ${gridFlags.refreshButton ? "refresh-button" : ""}
+                            ${gridFlags.downloadButton ? "download-button" : ""}
+                            ${gridFlags.printButton ? "print-button" : ""}
+
+                            ${grid_options ? `grid-options='${grid_options}'` : ""}
+
+                        ></ui-datatable>
+                    `;
+                else
+                    return `
+                        <ui-datatable
+                            owner-id="${datatableId}"
+                            grid-title="${element.title}"
+                            db-table="${element.element.table}"
+                            program="${program}"
+                            program-stack='${JSON.stringify(programStack)}'
+
+                            parent-table="${element.element.parent}"
+                            parent-field="${element.element.field_list}"
+                            parent-row-id="${row_id}"
+
+                            security-level='${sec_level}'
+                            parent-row='${line}'
+                            join-list='${join_list}'
+
+                            ${gridFlags.localData ? "local-data" : ""}
+                            ${gridFlags.uploadImageButton ? "upload-image-button" : ""}
+                            ${gridFlags.addButton ? "add-button" : ""}
+                            ${gridFlags.copyButton ? "copy-button" : ""}
+                            ${gridFlags.updateButton ? "update-button" : ""}
+                            ${gridFlags.deleteButton ? "delete-button" : ""}
+                            ${gridFlags.filterButton ? "filter-button" : ""}
+                            ${gridFlags.columnButton ? "column-button" : ""}
+                            ${gridFlags.refreshButton ? "refresh-button" : ""}
+                            ${gridFlags.downloadButton ? "download-button" : ""}
+                            ${gridFlags.printButton ? "print-button" : ""}
+
+                            ${grid_options ? `grid-options='${grid_options}'` : ""}
+
+                        ></ui-datatable>
+                    `;
+            }
+    }
+}
+
+export function formatCell(row, column, useIcons=true, zeroAsBlanks=true, returnAsText=true) {
+        let value = get(row, column.name);
+        let val = null;
+        // check if value is array (ie: m2m field)
+        if(isNull(value)) {
+            const keys = column.name.split(".");  // Groups Companies.CompanyId
+            if(keys.length === 0) return "";
+
+            const name = keys.slice(0, keys.length - 1).join('.'); // Companies
+            value = get(row, name);
+            if(isArray(value)) {
+                value.forEach(item => {
+                    const data = get(item, keys[keys.length - 1]);  // CompanyId
+                    const v = cellFormat(data, column, useIcons, zeroAsBlanks, returnAsText);
+                    if(isNil(val)) {
+                        val = v;
+                    } else {
+                        val += `, ${v}`;
+                    }
+                });
+                return val;
+            } else return "";
+        }
+
+        if(isEmpty(value)) return "";
+
+        if(column.numberType === "currency" && isNil(column.currency_value)) {
+            column.currency_value = null;
+            let curr_field = column.currencyCodeField;
+            let curr = get(row, curr_field);
+            if(isNil(curr)) {
+                if(column.name.includes(".")) {
+                    curr_field = column.name.substring(0, column.name.lastIndexOf("."));
+                    curr_field += "." + column.currencyCodeField
+                }
+                curr = get(row, curr_field);
+            }
+            if(Array.isArray(curr)) {
+                column.currency_value = curr[0];
+            } else {
+                column.currency_value = curr;
+            }
+        }
+
+        val = cellFormat(value, column, useIcons, zeroAsBlanks, returnAsText);
+        if(column.cell_function)
+        {
+            // cell_function(row, column, value, asString)
+            return column.cell_function(row, column, val, true);
+        }
+        return val;
+    }
+
+function cellFormat(value, column, useIcons=true, zeroAsBlanks=true, returnAsText=true) {
+        const locale = store.get("user.Settings.Locale")[0];
+        const timezone = store.get("user.Settings.Timezone")[0];
+
+        switch(column.type) {
+            case "Boolean":
+                if(useIcons) {
+                    // TODO: should we returnAsText always ? or
+                    //  useIcons=false and let the caller create a template literal ie: html`<div>..`;
+                    if(value) {
+                        if(returnAsText) return '<div class="flex items-center justify-center h-full w-full"><icon-check class="w-4 h-4 text-success"></icon-check></div>';
+                        else return html`<div class="h-full w-full"><icon-check class="w-4 h-4 text-success"></icon-check></div>`;
+                    } else {
+                        if(returnAsText) return '<div class="flex items-center justify-center h-full w-full"><icon-x class="w-4 h-4 text-error"></icon-x></div>';
+                        else return html`<div class="h-full w-full"><icon-x class="w-4 h-4 text-error"></icon-x></div>`;
+                    }
+                }
+                else {
+                    if(value) {
+                        return "yes";
+                    } else {
+                        return "no";
+                    }
+                }
+            case "Date":
+                if(value && !Array.isArray(value)) {
+                    // full = Tuesday, October 11, 2011
+                    // long = October 11, 2011
+                    // medium = Oct 11, 2011
+                    // short = 10/11/11
+                    return new Intl.DateTimeFormat(locale,
+                        { dateStyle: "medium" })
+                        .format(new Date(value));
+                } else {
+                    return "";
+                }
+            case "Time":
+                if(value && !Array.isArray(value)) {
+                    // full = 1:45:30 PM UTC+0
+                    // long = 1:45:30 PM UTC
+                    // medium = 1:45:30 PM
+                    // short = 1:45 PM
+                    return new Intl.DateTimeFormat(locale,
+                        { timeStyle: "medium" })
+                        .format(new Date(`1970-01-01T${value}`));
+                } else {
+                    return "";
+                }
+            case "DateTime":
+                // TODO: handle Arrays ie: ProgramState.Role.Group.Companies.InactiveTimeStamp
+                if(value && !Array.isArray(value)) {
+                    // iso utc datetime string  2025-01-02T09:07:00Z
+                    // convert to timezone
+                    return new Intl.DateTimeFormat(locale,
+                        { timeZone: timezone, dateStyle: "medium", timeStyle: "medium" })
+                        .format(new Date(value));
+                } else {
+                    return "";
+                }
+            case "Numeric":
+            case "Integer":
+            case "BigInteger":
+                if(isString(value)) {
+                    value = Number(value);
+                }
+                if(zeroAsBlanks && value === 0) {
+                    return "";
+                } else if(column.numberType === "currency") {
+                    return new Intl.NumberFormat(locale, {
+                        style: 'currency',
+                        currency: column.currency_value,
+                        currencyDisplay: 'symbol'
+                    }).format(value);
+                } else if(column.numberType === "percent") {
+                    return new Intl.NumberFormat(locale, {
+                        style: 'percent',
+                        minimumFractionDigits: column.decimals,
+                        maximumFractionDigits: column.decimals
+                    }).format(value/100);
+                } else if(column.numberType === "string") {
+                    return value.toString();
+                }
+                // defaults to column.numberType === "number"
+                return new Intl.NumberFormat(locale, {
+                    style: "decimal",
+                    minimumFractionDigits: column.decimals,
+                    maximumFractionDigits: column.decimals
+                }).format(value);
+            case "Enum":
+                if(Array.isArray(value)) {
+                    return value[0];
+                } else {
+                    return value;
+                }
+            default:
+                if(column.listFormat) {
+                    if(!value) {
+                        return "";
+                    } else if (!Array.isArray(value)) {
+                        try {
+                            value = JSON.parse(value);
+                            return value.join(", ");
+                        } catch(err) {
+                            return value;
+                        }
+                    }
+                    return value;
+                }
+                if(Array.isArray(value)) {
+                    return value.join(", ");
+                } else {
+                    return value;
+                }
+        }
+    }
+
+
+export class DatatableTable extends LitElement {
+    static styles = [
+        css `
+            :host{
+                height: 100%;
+                width: 100%;
+                overflow: auto;
+            }
+        `,
+        TWStyles
+    ];
+
+    static properties = {
+        datatableId: { attribute: "datatable-id", type: String },
+        panelTable: { attribute: "panel-table", type: String },
+
+        gridColumns: { type: Object },
+        gridTables: { type: Object },
+        gridData: { type: Object },
+        selectedRows: { type: Array },
+        openRows: { type: Array },
+        securityLevel: { type: Object },
+
+        // additional subTables
+        // placed before gridTables subTables
+        preSubTables: { type: Array },
+        // placed after gridTables subTables
+        postSubTables: { type: Array },
+
+        program: { type: String },
+        programStack: { attribute: "program-stack", type: Array },
+        tabSelect: { attribute: "tab-select", type: Number },
+        multiSelect: { attribute: "multiple", type: Boolean },
+        allRowsSelected: { attribute: "all-rows-selected", type: Boolean },
+        localData: { attribute: "local-data", type: Boolean },
+        uploadImageButton: { attribute: "upload-image-button", type: Boolean },
+        addButton: { attribute: "add-button", type: Boolean },
+        copyButton: { attribute: "copy-button", type: Boolean },
+        updateButton: { attribute: "update-button", type: Boolean },
+        deleteButton: { attribute: "delete-button", type: Boolean },
+        filterButton: { attribute: "filter-button", type: Boolean },
+        columnButton: { attribute: "column-button", type: Boolean },
+        refreshButton: { attribute: "refresh-button", type: Boolean },
+        downloadButton: { attribute: "download-button", type: Boolean },
+        printButton: { attribute: "print-button", type: Boolean },
+
+        gridOptions: { type: Object },
+        ownerId: { type: Object },
+        owner: { type: Object }
+    };
+
+    constructor() {
+        super();
+
+        this.onRowOpen = this.onRowOpen.bind(this);
+        this.onRowSelect = this.onRowSelect.bind(this);
+        this.onSortColumn = this.onSortColumn.bind(this);
+        this.onDragStart = this.onDragStart.bind(this);
+        this.onDragOver = this.onDragOver.bind(this);
+        this.onDragDrop = this.onDragDrop.bind(this);
+
+        this.panelTable = null;
+        this.gridColumns = null;
+        this.gridTables = null;
+        this.gridData = null;
+
+        this.selectedRows = [];
+        this.openRows = [];
+        this.tabSelect = 0;
+
+        this.preSubTables = [];
+        this.postSubTables = [];
+
+        this.multiSelect = false;
+        this.allRowsSelected = false;
+        this.localData = false;
+        this.uploadImageButton = false;
+        this.addButton = false;
+        this.copyButton = false;
+        this.updateButton = false;
+        this.deleteButton = false;
+        this.filterButton = false;
+        this.columnButton = false;
+        this.refreshButton = false;
+        this.downloadButton = false;
+        this.printButton = false;
+        this.securityLevel = {
+            "runLevel": 9999,
+            "createLevel": 9999,
+            "updateLevel": 9999,
+            "deleteLevel": 9999
+        };
+
+        this.numberOfCols = 0;
+        this.withSubTables = false;
+
+        this.gridOptions = null;
+        this.ownerId = null;
+        this.owner = null;
+
+        this.gridFlags = {};
+        this.programStack = [];
+    }
+
+    async connectedCallback() {
+        super.connectedCallback();
+
+        this.gridFlags["localData"] = this.localData;
+        this.gridFlags["uploadImageButton"] = this.uploadImageButton;
+        this.gridFlags["addButton"] = this.addButton;
+        this.gridFlags["copyButton"] = this.copyButton;
+        this.gridFlags["updateButton"] = this.updateButton;
+        this.gridFlags["deleteButton"] = this.deleteButton;
+        this.gridFlags["filterButton"] = this.filterButton;
+        this.gridFlags["columnButton"] = this.columnButton;
+        this.gridFlags["refreshButton"] = this.refreshButton;
+        this.gridFlags["downloadButton"] = this.downloadButton;
+        this.gridFlags["printButton"] = this.printButton;
+
+        this.setUp();
+    }
+
+    setUp() {
+        this.withSubTables = this.gridTables ? this.gridTables.length > 1 : false;
+        if(this.gridTables && this.gridTables[0].subTables &&
+           this.gridTables[0].subTables.length > 0) this.withSubTables = true;
+        if(this.preSubTables.length + this.postSubTables.length > 0)
+            this.withSubTables = true;
+        if(!this.withSubTables) {
+            // table documents
+            if(this.gridTables && this.gridTables[0].documents &&
+                this.gridTables[0].documents.length) this.withSubTables = true;
+            // field documents
+            if(!this.withSubTables) {
+                for(const ele of this.gridColumns) {
+                    if(ele.options.display && ele.documents && ele.documents.length) {
+                        this.withSubTables = true;
+                        break;
+                    }
+                }
+            }
+        }
+ /**
+        let sub_tables = this.gridTables && this.gridTables.length > 1 ? this.gridTables.length : 0;
+        if(this.preSubTables) {
+            this.preSubTables.forEach(component => {
+                if(component.program) {
+                    if(!this.programStack.includes(component.program)) sub_tables += 1;
+                } else sub_tables += 1;
+            });
+        }
+        if(this.postSubTables) {
+            this.postSubTables.forEach(component => {
+                if(component.program) {
+                    if(!this.programStack.includes(component.program)) sub_tables += 1;
+                } else sub_tables += 1;
+            });
+        }
+        this.numberOfCols = 0;
+        if(this.gridColumns) {
+            this.gridColumns.forEach(ele => {
+                if(ele.options.display) {
+                    this.numberOfCols += 1;
+                    if(ele.documents && ele.documents.length) {
+                        ele.documents.forEach(doc => {
+                            if(doc.program) {
+                                if(!this.programStack.includes(doc.program)) sub_tables += 1;
+                            } else sub_tables += 1;
+                        });
+                    }
+                }
+            });
+        }
+        if(this.gridTables && this.gridTables[0].documents) {
+            this.gridTables[0].documents.forEach(doc => {
+                if(doc.program) {
+                    if(!this.programStack.includes(doc.program)) sub_tables += 1;
+                } else sub_tables += 1;
+            });
+        }
+        this.withSubTables = false;
+        if(sub_tables > 0) this.withSubTables = true;
+**/
+        this.numberOfCols = 0;
+        if(this.gridColumns) {
+            this.gridColumns.forEach(ele => {
+                if(ele.options.display) {
+                    this.numberOfCols += 1;
+                }
+            });
+        }
+        if(this.withSubTables) this.numberOfCols += 1;
+    }
+
+    updated() {
+        this.setUp();
+        this.updateHeader();
+        this.updateBody();
+    }
+
+    alignCell(data_type) {
+        switch(data_type) {
+            case "Integer":
+            case "BigInteger":
+            case "Numeric":
+                return "text-right";
+            //case "Date":
+            //case "Time":
+            //case "DateTime":
+            //    return "text-center";
+            case "Boolean":
+                return "text-center"
+            default:
+                return "text-left";
+        }
+    }
+/**
+    formatCell(row, column, useIcons=true, zeroAsBlanks=true) {
+        let value = get(row, column.name);
+        let val = null;
+        // check if value is array (ie: m2m field)
+        if(isNull(value)) {
+            const keys = column.name.split(".");  // Groups Companies.CompanyId
+            if(keys.length === 0) return "";
+
+            const name = keys.slice(0, keys.length - 1).join('.'); // Companies
+            value = get(row, name);
+            if(isArray(value)) {
+                value.forEach(item => {
+                    const data = get(item, keys[keys.length - 1]);  // CompanyId
+                    const v = this.cellFormat(data, column, useIcons, zeroAsBlanks);
+                    if(isNil(val)) {
+                        val = v;
+                    } else {
+                        val += `, ${v}`;
+                    }
+                });
+                return val;
+            } else return "";
+        }
+
+        if(isEmpty(value)) return "";
+
+        if(column.numberType === "currency" && isNil(column.currency_value)) {
+            column.currency_value = null;
+            let curr_field = column.currencyCodeField;
+            let curr = get(row, curr_field);
+            if(isNil(curr)) {
+                if(column.name.includes(".")) {
+                    curr_field = column.name.substring(0, column.name.lastIndexOf("."));
+                    curr_field += "." + column.currencyCodeField
+                }
+                curr = get(row, curr_field);
+            }
+            if(Array.isArray(curr)) {
+                column.currency_value = curr[0];
+            } else {
+                column.currency_value = curr;
+            }
+        }
+
+        val = this.cellFormat(value, column, useIcons, zeroAsBlanks);
+        if(column.cell_function)
+        {
+            // cell_function(row, column, value, asString)
+            return column.cell_function(row, column, val, true);
+        }
+        return val;
+    }
+
+    cellFormat(value, column, useIcons=true, zeroAsBlanks=true) {
+        const locale = store.get("user.Settings.Locale")[0];
+        const timezone = store.get("user.Settings.Timezone")[0];
+
+        switch(column.type) {
+            case "Boolean":
+                if(useIcons) {
+                    if(value) {
+                        return '<div class="flex items-center justify-center h-full w-full"><icon-check class="w-4 h-4 text-success"></icon-check></div>';
+                    } else {
+                        return '<div class="flex items-center justify-center h-full w-full"><icon-x class="w-4 h-4 text-error"></icon-x></div>';
+                    }
+                }
+                else {
+                    if(value) {
+                        return "yes";
+                    } else {
+                        return "no";
+                    }
+                }
+            case "Date":
+                if(value && !Array.isArray(value)) {
+                    // full = Tuesday, October 11, 2011
+                    // long = October 11, 2011
+                    // medium = Oct 11, 2011
+                    // short = 10/11/11
+                    return new Intl.DateTimeFormat(locale,
+                        { dateStyle: "medium" })
+                        .format(new Date(value));
+                } else {
+                    return "";
+                }
+            case "Time":
+                if(value && !Array.isArray(value)) {
+                    // full = 1:45:30 PM UTC+0
+                    // long = 1:45:30 PM UTC
+                    // medium = 1:45:30 PM
+                    // short = 1:45 PM
+                    return new Intl.DateTimeFormat(locale,
+                        { timeStyle: "medium" })
+                        .format(new Date(`1970-01-01T${value}`));
+                } else {
+                    return "";
+                }
+            case "DateTime":
+                // TODO: handle Arrays ie: ProgramState.Role.Group.Companies.InactiveTimeStamp
+                if(value && !Array.isArray(value)) {
+                    // iso utc datetime string  2025-01-02T09:07:00Z
+                    // convert to timezone
+                    return new Intl.DateTimeFormat(locale,
+                        { timeZone: timezone, dateStyle: "medium", timeStyle: "medium" })
+                        .format(new Date(value));
+                } else {
+                    return "";
+                }
+            case "Numeric":
+            case "Integer":
+            case "BigInteger":
+                if(isString(value)) {
+                    value = Number(value);
+                }
+                if(zeroAsBlanks && value === 0) {
+                    return "";
+                } else if(column.numberType === "currency") {
+                    return new Intl.NumberFormat(locale, {
+                        style: 'currency',
+                        currency: column.currency_value,
+                        currencyDisplay: 'symbol'
+                    }).format(value);
+                } else if(column.numberType === "percent") {
+                    return new Intl.NumberFormat(locale, {
+                        style: 'percent',
+                        minimumFractionDigits: column.decimals,
+                        maximumFractionDigits: column.decimals
+                    }).format(value/100);
+                } else if(column.numberType === "string") {
+                    return value.toString();
+                }
+                // defaults to column.numberType === "number"
+                return new Intl.NumberFormat(locale, {
+                    style: "decimal",
+                    minimumFractionDigits: column.decimals,
+                    maximumFractionDigits: column.decimals
+                }).format(value);
+            case "Enum":
+                if(Array.isArray(value)) {
+                    return value[0];
+                } else {
+                    return value;
+                }
+            default:
+                if(column.listFormat) {
+                    if(!value) {
+                        return "";
+                    } else if (!Array.isArray(value)) {
+                        try {
+                            value = JSON.parse(value);
+                            return value.join(", ");
+                        } catch(err) {
+                            return value;
+                        }
+                    }
+                    return value;
+                }
+                if(Array.isArray(value)) {
+                    return value.join(", ");
+                } else {
+                    return value;
+                }
+        }
+    }
+**/
+    updateHeader() {
+        if(this.gridColumns === null) return false;
+
+        const thead = this.shadowRoot.querySelector('table thead');
+        thead.innerHTML = "";
+
+        const tr = document.createElement('tr');
+        tr.className = "overflow-x-auto bg-base-300 h-12";
+
+        if(this.withSubTables) {
+            // sub tables - for chevron down/up icons
+            const th = document.createElement('th');
+            tr.appendChild(th);
+        }
+
+        this.gridColumns.forEach(col => {
+            if(col.options.display) {
+                const align = this.alignCell(col.type);
+
+                const th = document.createElement('th');
+                th.dataset.id = col.name;
+                let cursor = "";
+                if(col.draggable) {
+                    cursor = "cursor-grab";
+                    th.setAttribute("draggable", true);
+                    th.addEventListener("dragstart", this.onDragStart);
+                    th.addEventListener("dragover", this.onDragOver);
+                    th.addEventListener("drop", this.onDragDrop);
+                }
+                th.className = `${align} ${cursor} py-3 px-6 align-middle text-sm font-semibold`;
+                const label = col.column_label ? col.column_label : col.label;
+                if(col.sortable) {
+                    // TODO: fix icon-arrowup/down hover image
+                    th.innerHTML = `
+                        <span>
+                            ${label}
+                            <div class="tooltip tooltip-bottom z-[10]" data-tip="Sort Column">
+                                <label class="swap swap-rotate">
+                                    <input type="checkbox"
+                                        ${col.options.sortDirection === "desc" ? "checked" : ""}
+                                        data-key="${col.name}"
+                                    ></input>
+                                    <icon-arrowup class="${col.options.sort ? 'swap-off w-4 h-4' : 'swap-off w-4 h-4 opacity-0 hover:opacity-100 transition duration-300'}"></icon-arrowup>
+                                    <icon-arrowdown class="${col.options.sort ? 'swap-on w-4 h-4' : 'swap-on w-4 h-4 opacity-0 hover:opacity-100 transition duration-300'}"></icon-arrowdown>
+                                </label>
+                            </div>
+                        </span>
+                    `;
+                    th.addEventListener("click", this.onSortColumn);
+                } else {
+                    th.textContent = label;
+                }
+                tr.appendChild(th);
+            }
+        });
+        thead.appendChild(tr);
+    }
+
+    onSortColumn(event) {
+        const input = event.target.closest("input");
+        if(input === null) return false;
+        const name = input.dataset.key;
+
+        this.gridColumns.forEach(col => {
+            if(name === col.name) {
+                col.options.sort = true;
+                switch(col.options.sortDirection) {
+                    case "asc":
+                        col.options.sortDirection = "desc";
+                        break;
+                    default:
+                        col.options.sortDirection = "asc";
+                }
+            } else {
+                col.options.sort = false;
+                col.options.sortDirection = "none";
+            }
+        });
+
+        this.dispatchEvent(new CustomEvent(`grid-sort-column-${this.datatableId}`, {
+            bubbles: true,
+            composed: true,
+            detail: {
+                value: this.gridColumns
+            }
+        }));
+    }
+
+    onDragStart(event) {
+        event.dataTransfer.setData('text/plain', event.target.dataset.id);
+    }
+
+    onDragOver(event) {
+        event.preventDefault();
+    }
+
+    onDragDrop(event) {
+        event.preventDefault();
+
+        const fromColumn = event.dataTransfer.getData('text/plain');
+        const toColumn = event.target.dataset.id;
+
+        const fromIndex = this.gridColumns.findIndex(item => item.name === fromColumn);
+        const toIndex = this.gridColumns.findIndex(item => item.name === toColumn);
+
+        const [item] = this.gridColumns.splice(fromIndex, 1);
+        this.gridColumns.splice(toIndex, 0, item);
+
+        this.dispatchEvent(new CustomEvent(`grid-drop-column-${this.datatableId}`, {
+            bubbles: true,
+            composed: true,
+            detail: {
+                value: this.gridColumns
+            }
+        }));
+    }
+
+    async updateBody() {
+        if(this.gridData === null) return false;
+
+        const tbody = this.shadowRoot.querySelector('table tbody');
+        tbody.innerHTML = "";
+
+        if(this.owner && this.owner.tagName === "FORM-PANEL") {
+            this.owner.initForm();
+        }
+
+        let index = -1;  // modifiable fields autofocus
+        let currentSection = null;
+        this.gridData.forEach((row, row_index) => {
+            let tr = document.createElement('tr');
+
+            if(this.gridOptions && "sectionHeader" in this.gridOptions) {
+                const value = get(row, this.gridOptions.sectionHeader, null);
+                if(!isNull(value) && value !== currentSection) {
+                    currentSection = value;
+                    const th = document.createElement('th');
+                    th.className = "bg-base-300 text-left";
+                    th.colSpan = this.numberOfCols;
+                    th.textContent = value;
+                    tr.appendChild(th);
+                    tbody.appendChild(tr);
+
+                    tr = document.createElement('tr');
+                }
+            }
+
+            tr.dataset.id = row.Id;
+            tr.addEventListener("click", this.onRowSelect);
+
+            if(this.multiSelect && this.allRowsSelected) {
+                tr.className = "h-10 bg-pink-950 text-white hover:bg-pink-800";
+            } else if(!isEmpty(this.selectedRows) && this.selectedRows.includes(row.Id)) {
+                tr.className = "h-10 bg-pink-950 text-white hover:bg-pink-800";
+            } else {
+                tr.className = "hover h-10 bg-base-100 text-content";
+            }
+
+            if(this.withSubTables) {
+                const td = document.createElement("td");
+                const button = document.createElement("button");
+                if(this.openRows.includes(row.Id)) {
+                    button.innerHTML = '<div class="flex items-center justify-center h-full w-full"><icon-chevronup class="w-4 h-4"></icon-chevronup></div>';
+                } else {
+                    button.innerHTML = '<div class="flex items-center justify-center h-full w-full"><icon-chevrondown class="w-4 h-4"></icon-chevrondown></div>';
+                }
+                button.className = "btn btn-ghost rounded-full";
+                // override dimensions in btn
+                button.style = "padding: 4px; height: inherit; min-height: inherit;";
+                button.addEventListener("click", this.onRowOpen);
+                td.appendChild(button);
+                tr.appendChild(td);
+            }
+
+            this.gridColumns.forEach(col => {
+                if(col.options.display) {
+                    const align = this.alignCell(col.type);
+
+                    const td = document.createElement('td');
+                    td.className = `${align} py-3 px-6 align-middle text-sm`;
+                    if(col.options.modifiable && this.owner) {
+                        index++;
+                        if(this.owner.tagName === "UI-FORM") {
+                            const field = get(row, col.name, null);
+                            if(field) {
+                                const node = buildField(field, index, this.owner.formData);
+                                node.ownerId = this.ownerId;
+                                node.owner = this.owner;
+                                this.owner.populateValidationList(node);
+                                this.owner.addFieldNode(node, true);  // lit node
+                                td.appendChild(node);
+                            } else {
+                                td.innerHTML = formatCell(row, col);
+                            }
+                        } else if(this.owner.tagName === "FORM-PANEL") {   // FORM-PANEL
+                            let fld_name = get(row, col.name, null);
+                            if(fld_name) fld_name = get(fld_name, "name", fld_name);
+                            if(isArray(fld_name)) {
+                                fld_name.forEach(fld => {
+                                    const name = get(fld, "name", null);
+                                    if(name) {
+                                        const field = this.owner.schemaFields.find(item => item.name === name);
+                                        const node = buildField(field, index, this.owner.formData);
+                                        node.ownerId = this.owner.instanceId;
+                                        node.owner = this.owner;
+                                        this.owner.populateValidationList(field);
+                                        this.owner.addFieldNode(node);
+                                        td.appendChild(node);
+                                    }
+                                })
+                            } else {
+                                const field = this.owner.schemaFields.find(item => item.name === fld_name);
+                                if(field) {
+                                    const node = buildField(field, index, this.owner.formData);
+                                    node.ownerId = this.owner.instanceId;
+                                    node.owner = this.owner;
+                                    this.owner.populateValidationList(field);
+                                    this.owner.addFieldNode(node);
+                                    td.appendChild(node);
+                                } else {
+                                    td.innerHTML = formatCell(row, col);
+                                }
+                            }
+                        } else {
+                            td.innerHTML = formatCell(row, col);
+                        }
+                    } else {
+                        // use innerHTML instead of textContent - to handle HTML content
+                        td.innerHTML = formatCell(row, col);
+                    }
+                    tr.appendChild(td);
+                }
+            });
+            tbody.appendChild(tr);
+
+            if(this.withSubTables && this.openRows.includes(row.Id)) {
+                const tr = document.createElement('tr');
+                tr.dataset.subid = row.Id;
+
+                const td = document.createElement('td');
+                td.setAttribute("colspan", this.numberOfCols);
+                td.innerHTML = createSubTables(row, this.panelTable, this.gridTables,
+                                               this.gridColumns, this.preSubTables,
+                                               this.postSubTables, this.tabSelect,
+                                               this.program, this.datatableId,
+                                               this.securityLevel, this.gridFlags,
+                                               this.gridOptions, this.programStack,
+                                               this);
+
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+            }
+        });
+        if(this.owner && this.owner.tagName === "FORM-PANEL") {
+            this.owner.finalizeForm();
+        }
+    }
+
+    requestForValue(key) {
+        let handled = false;
+        let value = null;
+
+        this.dispatchEvent(new CustomEvent('request-for-value', {
+            bubbles: true,
+            composed: true,
+            detail: {
+                key: key,
+                reply: (val) => {
+                    handled = true;
+                    value = val;
+                }
+            }
+        }));
+/***
+        // fallback: nobody handled the event
+        queueMicrotask(() => {
+            if (!handled) {
+                value = null;
+            }
+        });
+***/
+        return value;
+    }
+
+    onRowSelect(event) {
+        if(event.target.closest("button")) return false;
+
+        const tr = event.target.closest("tr");
+        if(tr === null) return false;
+
+        if(event.target.tagName.toLowerCase() === "ui-combobox") return false;
+        if(event.target.tagName.toLowerCase() === "ui-input") return false;
+        if(event.target.tagName.toLowerCase() === "select") return false;
+        if(event.target.tagName.toLowerCase() === "input") return false;
+
+        this.dispatchEvent(new CustomEvent(`grid-row-selected-${this.datatableId}`, {
+            bubbles: true,
+            composed: true,
+            detail: {
+                value: tr.dataset.id
+            }
+        }));
+    }
+
+    onRowOpen(event) {
+        const tr = event.target.closest("tr");
+        if(tr === null) return false;
+
+        const row_id = parseInt(tr.dataset.id);
+        const indexToItem = this.openRows.indexOf(row_id);
+
+        if (indexToItem === -1) {
+            // open
+            this.openRows.push(row_id);
+        } else {
+            // close
+            this.openRows.splice(indexToItem, 1);
+        }
+
+        this.dispatchEvent(new CustomEvent(`grid-row-opened-${this.datatableId}`, {
+            bubbles: true,
+            composed: true,
+            detail: {
+                value: this.openRows
+            }
+        }));
+    }
+
+    render() {
+        return html`
+            <div class="block w-full overflow-auto">
+                <table class="table table-pin-rows table-auto">
+                    <thead></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        `;
+    }
+}
+
+customElements.define("datatable-table", DatatableTable)

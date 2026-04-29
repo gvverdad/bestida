@@ -1,0 +1,22 @@
+<div class="navbar flex justify-between items-center shadow-xl">
+    <div class="breadcrumbs flex bg-base text-base-content normal-case font-light text-xl">
+        <ol id="breadcrumb_list">
+        {% for nav in nav_state %}
+            <li>
+                <a href="{{ nav.path }}" data-link data-crumb="{{ nav.path }}"
+                   {% if active_page == nav.path %} data-active="{{ nav.path }}" {% endif %}
+                    class="pointer-events-auto pointer-events-none normal-case font-medium">{{ nav.title }}</a>
+            </li>
+        {% endfor %}
+        </ol>
+    </div>
+    <div class="flex">
+        <div class="tooltip tooltip-bottom" data-tip="Close">
+            <button id="close_page_button"
+                    class="btn btn-ghost rounded-full hidden"
+                    style="padding: 8px; height: inherit; min-height: inherit;">
+                <span data-icon>x</span>
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,39 @@
+<div data-title="Import Release Tables"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Import Release Tables"
+            db-table="Tasks"
+            class="w-full overflow-y-auto"
+            mode="Create"
+            url="/importrelease"
+        >
+            <ui-step
+                step-title="Ruleset"
+                data-panel=""
+            >
+                <ui-form
+                    form-title="Import Release Table Ruleset"
+                >
+                    <ui-input
+                        label="Release File"
+                        name="Params.file"
+                        type="file"
+                        required="Release File is a Required Field"
+                        autofocus
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+            <ui-step
+                step-title="Task"
+                data-panel=""
+            >
+                <ui-submittaskform
+                    runscript="tasks.system.import.importreleasetables.ImportReleaseTables"
+                    program-name="ImportReleaseTables"
+                    program-type="Script"
+                    ruleset-title="Import Release Tables"
+                 >
+                 </ui-submittaskform>
+            </ui-step>
+        </ui-stepper>
+</div>

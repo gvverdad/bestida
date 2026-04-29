@@ -1,0 +1,24 @@
+<ui-form>
+    <ui-combobox label="Account" placeholder=" "
+        name="Account"
+        required="Account is a Required Field"
+        autofocus
+        selectTable="Customers"
+        selectId="Id"
+        selectKey="Name"
+    ></ui-combobox>
+    <ui-combobox label="Deliver Via" placeholder=" "
+        name="Warehouse"
+        required="Deliver Via is a Required Field"
+        selectTable="CustomerWarehouses"
+        selectId="Id"
+        selectKey="Name"
+    ></ui-combobox>
+    <ui-combobox label="Store" placeholder=" "
+        name="Store"
+        required="Store is a Required Field"
+        selectTable="CustomerStores"
+        selectId="Id"
+        selectKey="Name"
+    ></ui-combobox>
+</ui-form>

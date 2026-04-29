@@ -1,0 +1,24 @@
+<div data-title="Set Locale"
+     class="flex flex-col justify-center items-center w-fit h-full overflow-y-auto">
+    <ui-form form-title="Set Locale" action="/setlocale" method="put"
+        initial-values='{"locale": "{{ locale }}" }'
+        submit-post-put-handler="afterSubmitLocale"
+        form-buttons
+    >
+        <ui-combobox label="Locale" placeholder=" "
+            name="locale"
+            required="Locale is a Required Field"
+            autofocus
+            choices='{{ locales | tojson(indent=2) }}'
+        ></ui-combobox>
+    </ui-form>
+</div>
+<script>
+    function afterSubmitLocale(event, data) {
+        // user is globally defined in view.js
+        user.setup();
+
+        // closePage is globally defined in view.js
+        closePage();
+    }
+</script>

@@ -1,0 +1,69 @@
+<div data-title="Purge Jobs"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Purge Jobs"
+            db-table="Tasks"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Rulesets"
+                data-panel=""
+                active-page
+            >
+                <div class="flex flex-col justify-center items-center w-full h-full">
+                    <ui-datatable
+                        grid-title="Rulesets"
+                        db-table="Rulesets"
+                        program="Purgejobs.Rulesets"
+                        next-button-text="New"
+                        next-button-select-text="Update"
+                        active-next-button
+                        delete-button
+                        filter-button
+                        column-button
+                        refresh-button
+                        download-button
+                        print-button
+                    ></ui-datatable>
+                </div>
+            </ui-step>
+            <ui-step
+                step-title="Ruleset"
+                data-panel="Params"
+            >
+                <ui-form>
+                    <ui-input label="Title" placeholder=" "
+                        name="Title"
+                        type="text"
+                        required="Title is a Required Field"
+                        autofocus
+                    ></ui-input>
+                    <ui-input label="Days to Retain" placeholder=" "
+                              type="number" field-type="Integer"
+                              name="days"
+                              required="Days to Retain is a Required Field"
+                              validator="['ZeroPositive']"
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+            <ui-step
+                step-title="Task"
+                data-panel=""
+            >
+                <ui-form>
+                    <ui-input label="Title" placeholder=" "
+                        name="Title"
+                        type="text"
+                        required="Title is a Required Field"
+                        autofocus
+                    ></ui-input>
+                    <ui-input label="Days to Retain" placeholder=" "
+                              type="number" field-type="Integer"
+                              name="days"
+                              required="Days to Retain is a Required Field"
+                              validator="['ZeroPositive']"
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+        </ui-stepper>
+</div>

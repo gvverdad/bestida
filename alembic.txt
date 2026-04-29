@@ -1,0 +1,11 @@
+Initial
+alembic upgrade head
+
+Autogenerate
+alembic revision --autogenerate -m "Added account table"
+
+downgrade back to the beginning
+alembic downgrade base
+
+downgrade 1
+alembic downgrade -1

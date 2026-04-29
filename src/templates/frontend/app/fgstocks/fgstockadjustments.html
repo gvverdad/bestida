@@ -1,0 +1,183 @@
+<div data-title="Product Stock Adjustment"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Product Stock Adjustment"
+            stepper-title-fields='[["Style.Style", "Colour.Colour", "Fitting.Fitting", "Dimension.Dimension"],
+                                    ["Warehouse.Warehouse","Area.Area","Location.Location"]]'
+            db-table="FGStockMovements"
+            class="w-full overflow-y-auto"
+            mode="Create"
+            url="/fgstockadjustments"
+        >
+            <ui-step
+                step-title="Product/Location/Reference"
+                data-panel=""
+                active-page
+                fetch-data
+            >
+                <div class="flex flex-col justify-center items-center w-full h-full">
+                    <ui-form>
+                        <div class="flex gap-4">
+                            <ui-combobox label="Style" placeholder=" "
+                                name="Style"
+                                required="Style is Required"
+                                autofocus
+                                selectTable="Products"
+                                selectId="Id"
+                                selectKey="Style"
+                                selectFormat='["Style","Name"]'
+                            ></ui-combobox>
+                            <ui-combobox label="Colour" placeholder=" "
+                                name="Colour"
+                                required="Colour is Required"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Colour.Colour"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Fitting", "value": "."},
+                                                {"field": "Dimension", "value": "."}]'
+                            ></ui-combobox>
+                            <ui-combobox label="Fitting" placeholder=" "
+                                name="Fitting"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Fitting.Fitting"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Colour", "value": "."},
+                                                {"field": "Dimension", "value": "."}]'
+                            ></ui-combobox>
+                            <ui-combobox label="Dimension" placeholder=" "
+                                name="Dimension"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Dimension.Dimension"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Fitting", "value": "."},
+                                                {"field": "Colour", "value": "."}]'
+                            ></ui-combobox>
+                        </div>
+                        <div class="flex gap-4">
+                            <ui-combobox label="Warehouse" placeholder=" "
+                                name="Warehouse"
+                                required="Warehouse is Required"
+                                selectTable="Warehouses"
+                                selectId="Id"
+                                selectKey="Warehouse"
+                                selectFormat='["Warehouse","Name"]'
+                            ></ui-combobox>
+                            <ui-combobox label="Area" placeholder=" "
+                                name="Area"
+                                required="Area is Required"
+                                selectTable="WarehouseAreas"
+                                selectId="Id"
+                                selectKey="Area"
+                                selectFormat='["Area","Name"]'
+                                selectField="ItemWarehouse.Warehouse"
+                                selectFieldValue="Warehouse.Warehouse"
+                            ></ui-combobox>
+                            <ui-combobox label="Location" placeholder=" "
+                                name="Location"
+                                required="Location is Required"
+                                autofocus
+                                selectTable="WarehouseLocations"
+                                selectId="Id"
+                                selectKey="Location"
+                                selectField="ItemWarehouseArea.Area"
+                                selectFieldValue="Area.Area"
+                            ></ui-combobox>
+                        </div>
+                        <ui-input
+                            label="Reference"
+                            name="Reference"
+                            type="text"
+                            maxlength="256"
+                        ></ui-input>
+                        <ui-input
+                            label="Comments"
+                            name="Comments"
+                            type="text"
+                            field-type="Text"
+                            text-rows="1"
+                        ></ui-input>
+                    </ui-form>
+                </div>
+            </ui-step>
+            <ui-step
+                step-title="Adjustment"
+                data-panel=""
+                fetch-data
+            >
+                <ui-form>
+                    <div class="flex gap-4">
+                        <ui-combobox label="Adjustment Reason" placeholder=" "
+                            name="Reason"
+                            required="Reason is Required"
+                            selectTable="FGStockAdjustmentReasons"
+                            selectId="Id"
+                            selectKey="Description"
+                        ></ui-combobox>
+                        <ui-combobox label="Adjustment Type" placeholder=" "
+                            name="AdjustmentType"
+                            required="Adjustment Type is Required"
+                            choices='[["Adjustment","Adjustment"], ["Replacement","Replacement"]]'
+                        ></ui-combobox>
+                    </div>
+                    <ui-input
+                        label="Total Units"
+                        name="Total"
+                        type="number"
+                        field-type="Integer"
+                        validators='["NotZero", "Total"]'
+                        validator-fields='[{"Total":"AdjQty"}]'
+                        validator-messages='[{"Total":"Total not equal sum of Adjusted Qty"}]'
+                    ></ui-input>
+
+                    <ui-datatable
+                        name="Sizes"
+                        grid-title="Sizes"
+
+                        get-schema-url="/productstockadjgridschema"
+                        post-data-url="/productstockadjgriddata"
+                        get-data-filter='[
+                            {"field": "Style", "op": "="},
+                            {"field": "Colour", "op": "="},
+                            {"field": "Fitting", "op": "="},
+                            {"field": "Dimension", "op": "="},
+                            {"field": "Warehouse", "op": "="},
+                            {"field": "Area", "op": "="},
+                            {"field": "Location", "op": "="}
+                        ]'
+
+                        stateless
+
+                        refresh-button
+                        download-button  print-button
+                        grid-options='{"footer": false}'
+                    ></ui-datatable>
+                    <ui-input
+                        name="Params.criteria"
+                        type="hidden"
+                    ></ui-input>
+                    <ui-input
+                        name="Params.criteriatype"
+                        type="hidden"
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+        </ui-stepper>
+</div>

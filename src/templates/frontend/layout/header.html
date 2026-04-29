@@ -1,0 +1,51 @@
+<header class="navbar bg-primary text-primary-content flex justify-between items-center">
+    <div class="flex items-center gap-x-5">
+        <div class="flex">
+            <label for="menu-drawer" aria-label="open sidebar"
+                   class="btn btn-ghost rounded-full"
+                   style="padding: 8px; height: inherit; min-height: inherit;">
+                <span data-icon>bars3</span>
+            </label>
+        </div>
+        <div class="flex">
+            <a class="normal-case text-xl" data-link data-company_name
+               href="/changecompany"></a>
+        </div>
+    </div>
+    <div class="flex items-center gap-4">
+        <div class="tooltip tooltip-bottom" data-tip="Toggle Theme">
+            <button class="btn btn-ghost rounded-full" data-toggleTheme
+                    style="padding: 8px; height: inherit; min-height: inherit;">
+                <span id="dark_theme" data-icon>moono</span>
+                <span id="light_theme" data-icon>suno</span>
+            </button>
+        </div>
+        <div class="tooltip tooltip-bottom" data-tip="Notifications">
+            <div class="indicator">
+                <div id="mynotifications" class="dropdown dropdown-end">
+                    <label tabindex="0" class="btn btn-ghost rounded-full"
+                        style="padding: 8px; height: inherit; min-height: inherit;">
+                        <span data-icon>bello</span>
+                    </label>
+                    <div data-myNotificationsList></div>
+                </div>
+                <div data-totalMyNotifications></div>
+            </div>
+        </div>
+        <div class="tooltip tooltip-bottom" data-tip="Logout">
+            <a class="btn btn-ghost rounded-full" href="/logout"
+                style="padding: 8px; height: inherit; min-height: inherit;">
+                <span data-icon>power</span>
+            </a>
+        </div>
+        <div class="tooltip tooltip-bottom" data-tip="User Menu">
+            <div id="user_menu" class="dropdown dropdown-end">
+                <label tabindex="0" class="btn btn-ghost rounded-full"
+                    style="padding: 8px; height: inherit; min-height: inherit;">
+                    <span data-icon>ellipsisv</span>
+                </label>
+                {% include "./menu/user_menu.html" %}
+            </div>
+        </div>
+    </div>
+</header>

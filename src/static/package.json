@@ -1,0 +1,49 @@
+{
+  "name": "bestida",
+  "version": "1.0.0",
+  "description": "Bestida",
+  "main": "tailwind.config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev_css": "concurrently \"tailwindcss --input tailwindcss/tw.css --output css/tw.css --watch \" \"twlit --input css/tw.css --output css/tw.js\"",
+    "build-watch": "webpack --watch",
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.23.3",
+    "@babel/preset-env": "^7.23.3",
+    "babel-loader": "^9.1.3",
+    "concurrently": "^8.2.2",
+    "css-loader": "^6.8.1",
+    "cssnano": "^7.0.6",
+    "html-webpack-plugin": "^5.5.3",
+    "postcss": "^8.4.49",
+    "postcss-loader": "^8.0.0",
+    "postcss-preset-env": "^9.3.0",
+    "sass": "^1.69.5",
+    "sass-loader": "^13.3.2",
+    "style-loader": "^3.3.3",
+    "webpack": "^5.89.0",
+    "webpack-bundle-analyzer": "^4.10.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "@material-tailwind/html": "^2.2.2",
+    "@tailwindcss/typography": "^0.5.13",
+    "daisyui": "^3.9.4",
+    "date-fns": "^4.1.0",
+    "flatpickr": "^4.6.13",
+    "lit": "^3.1.0",
+    "tailwindcss": "^3.3.5",
+    "twlit": "^0.0.1-alpha.37",
+    "xlsx": "^0.18.5",
+    "yup": "^0.32.11"
+  }
+}

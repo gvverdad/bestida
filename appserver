@@ -1,0 +1,123 @@
+#!/home/gvv/Projects/bestida/venv/bin/python
+import importlib, sys, re, ast, logging.config
+from configparser import ConfigParser, ExtendedInterpolation
+
+#import uvicorn
+from gunicorn.app.base import BaseApplication
+from fastapi import FastAPI, HTTPException, status, Request
+from fastapi.responses import RedirectResponse, JSONResponse
+from starlette.middleware.cors import CORSMiddleware
+from fastapi_sqlalchemy import DBSessionMiddleware
+from fastapi.staticfiles import StaticFiles
+
+
+class App(FastAPI):
+    def __init__(self, config=None, **kwargs):
+        super(App, self).__init__(**kwargs)
+
+        self.config = config
+
+    def include(self, module):
+        getattr(importlib.import_module(module), "include_me")(self, self.config)
+
+
+class AppServer(BaseApplication):
+    def __init__(self, app, options=None):
+        self.options = options or {}
+        self.application = app
+        super().__init__()
+
+    def load_config(self):
+        for key, value in self.options.items():
+            self.cfg.set(key, value)
+
+    def load(self):
+        return self.application
+
+
+def run(argv=sys.argv):
+    config = ConfigParser(interpolation=ExtendedInterpolation())
+    config.read_file(open(argv[1], encoding="utf-8"))
+    logging.config.fileConfig(argv[1])
+    # python 3.10+
+    # logging.config.fileConfig(argv[1], encoding="utf-8")
+
+    app = App(config=config,
+              debug=True,
+              title=config["main"]["title"],
+              description=config["main"]["description"],
+              version=config["main"]["app_version"],
+              openapi_url=config["main"]["openapi_url"])
+
+    app.include("src.middleware")
+    app.include("src.config")
+    app.include("src.cache")
+    app.include("src.db")
+    app.include("src.services")
+    app.include("src.api.{}".format(config["main"]["api_version"]))
+
+    app.include("src.server")
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=ast.literal_eval(config["cors"]["origins"]),
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # global access to a database session (db.session from fastapi_sqlalchemy.db)
+    app.add_middleware(DBSessionMiddleware, db_url=config["sqlalchemy"]["url"])
+
+    app.mount(config["static"]["public"],
+              StaticFiles(directory=config["static"]["location"]), name="static")
+    app.mount(config["spooler"]["public"],
+              StaticFiles(directory=config["spooler"]["location"]), name="spools")
+    app.mount(config["image"]["public"],
+              StaticFiles(directory=config["image"]["location"]), name="images")
+
+
+    # Custom exception handler
+    @app.exception_handler(HTTPException)
+    async def custom_http_exception_handler(request: Request, exc: HTTPException):
+        if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+            return RedirectResponse(url=f"/?message={exc.detail}")
+
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
+
+    # Uvicorn worker processes/threads to handle incoming requests
+    # +ve for processes, -ve for threads
+    brokers = 1
+    if "brokers" in config["main"]:
+        brokers = int(config["main"]["brokers"])
+    # https://fastapi.tiangolo.com/deployment/server-workers/
+    # as of now, Uvicorn's capabilities for handling worker processes are more
+    # limited than Gunicorn's. So, if you want to have a process manager at this
+    # level (at the Python level), then it might be better to try with Gunicorn as
+    # the process manager.
+
+    host = config["main"]["host"]
+    port = int(config["main"]["port"])
+
+    #uvicorn.run(app,
+    #            host=host,
+    #            port=port,
+    #            log_config=argv[1]) # logger name: uvicorn
+
+    # Gunicorn uses --workers for process and --threads for threads
+    # therefore brokers should always be +ve
+    options = dict(
+        workers=brokers,
+        bind=f"{host}:{port}",
+        worker_class="uvicorn.workers.UvicornWorker",
+        logconfig=argv[1],  # logger name: gunicorn.error, gunicorn.access
+    )
+    AppServer(app, options=options).run()
+
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+    sys.exit(run())

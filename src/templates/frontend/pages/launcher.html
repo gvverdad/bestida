@@ -1,0 +1,26 @@
+<div data-title="Launcher"
+     class="flex flex-col justify-center items-center w-fit h-full overflow-y-auto">
+    <ui-form form-title="Program Launcher" submit-handler="onSubmitLauncher"
+        submit-text="Launch"
+        form-buttons>
+        <ui-combobox label="Program" placeholder=" "
+            name="program"
+            required="Program is a Required Field"
+            autofocus
+            choices='{{ programs | tojson(indent=2) }}'
+        ></ui-combobox>
+    </ui-form>
+</div>
+<script>
+    function onSubmitLauncher(event, formData) {
+        event.preventDefault();
+
+        // defined globally in view.js
+        // navigateTo, removeThisPage
+
+        removeThisPage();
+        if(formData["program"]) {
+            navigateTo(formData["program"]);
+        }
+    }
+</script>

@@ -1,0 +1,120 @@
+https://blog.knoldus.com/postgresql-cheat-sheet-basics/
+
+https://tableplus.com/blog/2018/04/postgresql-how-to-grant-access-to-users.html
+
+Check Version
+psql -V
+
+Login to PostgreSQL
+sudo -u postgres psql
+
+List all databases
+\l
+
+
+Dropping database
+DROP DATABASE db_name;
+
+
+Creating Database
+CREATE DATABASE db_name;
+
+
+Grant all privileges on the database:
+GRANT ALL PRIVILEGES ON DATABASE database_name TO username;
+
+
+connect to database
+psql dbname username
+
+To view help for psql commands, type \?.
+To view help for SQL commands, type \h.
+To view information about the current database connection, type \conninfo.
+To list the database's tables and their respective owners, type \dt.
+To list the database's index, type \di
+To list all tables, views, and sequences in the database, type \z.
+To exit the psql program, type \q.
+
+list all database types(enums)
+\dT
+
+list all database types(enums) with values
+\dT+
+
+https://blog.yo1.dog/updating-enum-values-in-postgresql-the-safe-and-easy-way/
+
+to add enum values
+ALTER TYPE enum_type ADD VALUE 'new_value'; -- appends to list
+ALTER TYPE enum_type ADD VALUE 'new_value' BEFORE 'old_value';
+ALTER TYPE enum_type ADD VALUE 'new_value' AFTER 'old_value';
+
+Although enum types are primarily intended for static sets of values,
+there is support for adding new values to an existing enum type,
+and for renaming values (see ALTER TYPE).
+Existing values cannot be removed from an enum type,
+nor can the sort ordering of such values be changed,
+short of dropping and re-creating the enum type.
+https://stackoverflow.com/questions/1771543/adding-a-new-value-to-an-existing-enum-type
+ALTER TYPE "Tasks_Notify" RENAME TO "Tasks_Notify_old";
+CREATE TYPE "Tasks_Notify" AS ENUM('Never', 'Always', 'Conditional');
+ALTER TABLE "Tasks" ALTER COLUMN "Notify" TYPE "Tasks_Notify" USING "Notify"::text::"Tasks_Notify";
+DROP TYPE "Tasks_Notify_old";
+
+
+
+ubuntu install
+sudo apt-get -y install postgresql-12
+
+
+To Create Database and User
+sudo -u postgres psql
+postgres=# create database cha;
+postgres=# create user cha with password '11gv1327';
+postgres=# grant all privileges on database cha to cha;
+
+
+To check location of pg_hba.conf
+SHOW hba_file;
+
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  Peer authentication failed for user "cha"
+modify hba_file to:
+#local   all             all                                     peer
+local   all             all                                     md5
+
+peer means it will trust the identity (authenticity) of UNIX user. So not asking for a password.
+md5 means it will always ask for a password, and validate it after hashing with MD5.
+trust means it will never ask for a password, and always trust any connection.
+
+After change pg_hba.conf file, you can execute SELECT pg_reload_conf();
+or pg_ctl reload with superuser instead of restart postgresql service.
+
+
+Dump database
+pg_dump -h hostname -p port -U db_user -d db_name > dump_file.sql
+
+Restore database
+pg_restore: error: input file appears to be a text format dump. Please use psql.
+This error message is seen when the user tries to restore a text-based dump file using the pg_restore tool.
+Usually, the pg_dump tool creates a dump file in text format.
+A single step restoration of a text file is only possible by using psql.
+In order to use pg_restore,
+we must convert the text file to tar format and then execute the restore command.
+
+1. Drop Database
+2. Create Database
+3. Grant privileges
+4. psql -U db_user db_name < dump_file.sql
+
+
+Drop Tables with wildcard
+tables=`psql -d db_name -U user -P tuples_only=1 -c '\dt' |awk -F " " '/pattern/ {print "\""$3"\""","}'`
+psql -d db_name -U user -c "DROP TABLE ${tables%?};";
+ie:
+tables=`psql -d paz -U paz -P tuples_only=1 -c '\dt' |awk -F " " '/_version/ {print "\""$3"\""","}'`
+psql -d paz -U paz -c "DROP TABLE ${tables%?};";
+
+
+Change All Tables OWNER
+sudo -u postgres psql
+\c [your database]
+REASSIGN OWNED BY [old_user] TO [new_user];

@@ -1,0 +1,91 @@
+<div data-title="Product Net Position"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Product Net Position"
+            stepper-title-fields='[["Style.Style", "Style.Name", "Colour.Colour", "Fitting.Fitting", "Dimension.Dimension"],
+                                    ["Warehouses[*].Warehouse"]]'
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Product/Warehouses"
+                data-panel=""
+                active-page
+                fetch-data
+            >
+                <div class="flex flex-col justify-center items-center w-full h-full">
+                    <ui-form>
+                        <div class="flex gap-4">
+                            <ui-combobox label="Style" placeholder=" "
+                                name="Style"
+                                required="Style is Required"
+                                autofocus
+                                selectTable="Products"
+                                selectId="Id"
+                                selectKey="Style"
+                                selectFormat='["Style","Name"]'
+                            ></ui-combobox>
+                            <ui-combobox label="Colour" placeholder=" "
+                                name="Colour"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Colour.Colour"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Fitting", "value": "."},
+                                                {"field": "Dimension", "value": "."}]'
+                            ></ui-combobox>
+                            <ui-combobox label="Fitting" placeholder=" "
+                                name="Fitting"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Fitting.Fitting"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Colour", "value": "."},
+                                                {"field": "Dimension", "value": "."}]'
+                            ></ui-combobox>
+                            <ui-combobox label="Dimension" placeholder=" "
+                                name="Dimension"
+                                selectTable="ProductColourFitDims"
+                                selectId="Id"
+                                selectKey="Dimension.Dimension"
+                                selectFormat='["ItemProduct.Style",
+                                                "Colour.Colour",
+                                                "Fitting.Fitting",
+                                                "Dimension.Dimension"]'
+                                selectField="ItemProduct.Style"
+                                selectFieldValue="Style.Style"
+                                selectCascade='[{"field": "Fitting", "value": "."},
+                                                {"field": "Colour", "value": "."}]'
+                            ></ui-combobox>
+                        </div>
+                        <ui-combobox label="Warehouses" placeholder=" "
+                                name="Warehouses"
+                                selectTable="Warehouses"
+                                selectId="Id"
+                                selectKey="Warehouse"
+                                selectFormat='["Warehouse","Name"]'
+                                multiple
+                        ></ui-combobox>
+                    </ui-form>
+                </div>
+            </ui-step>
+            <ui-step
+                step-title="Net Position"
+                data-panel=""
+                no-next-button
+            >
+                <ui-document
+                    program="DocumentFGNetPosition"
+                ></ui-document>
+            </ui-step>
+        </ui-stepper>
+</div>

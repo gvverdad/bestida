@@ -1,0 +1,93 @@
+<div data-title="Export Release Tables"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Export Release Tables"
+            db-table="Tasks"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Rulesets"
+                data-panel=""
+                active-page
+                fetch-data
+            >
+                <div class="flex flex-col justify-center items-center w-full h-full">
+                    <ui-datatable
+                        grid-title="Rulesets"
+                        db-table="Rulesets"
+                        program="ExportReleaseTables.Rulesets"
+                        get-schema-url="/exportreleasegridschema"
+                        post-data-url="/exportreleaserulesets"
+                        select-row
+                        form-mode
+                        next-button-text="New"
+                        next-button-select-text="Update"
+                        active-next-button
+                        delete-button
+                        filter-button
+                        column-button
+                        refresh-button
+                        download-button
+                        print-button
+
+                    ></ui-datatable>
+                </div>
+            </ui-step>
+            <ui-step
+                step-title="Ruleset"
+                data-panel=""
+            >
+                <ui-form
+                    form-title="Export Release Table Ruleset"
+                    grid="Params.programs"
+                    grid-listeners='[{"event": "criteria", "field": "Params.criteria"},
+                    {"event": "criteria_type", "field": "Params.criteriatype"}]'
+                >
+                    <ui-input
+                        label="Title"
+                        name="Title"
+                        type="text"
+                        maxlength="128"
+                        required="Title is a Required Field"
+                        autofocus
+                    ></ui-input>
+                    <ui-checkbox
+                        label="Initial Release"
+                        name="Params.initial"
+                    ></ui-checkbox>
+                    <ui-datatable
+                        name="Params.programs"
+                        grid-title="Select Program"
+                        db-table="Programs"
+                        program="ExportReleaseTables.Ruleset.Programs"
+                        min="1"
+                        validator-messages='[{"Min":"Select at least 1 row"}]'
+
+                        multiple
+                        input-data-select
+                        filter-button  column-button  refresh-button
+                        download-button  print-button
+                    ></ui-datatable>
+                    <ui-input
+                        name="Params.criteria"
+                        type="hidden"
+                    ></ui-input>
+                    <ui-input
+                        name="Params.criteriatype"
+                        type="hidden"
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+            <ui-step
+                step-title="Task"
+                data-panel=""
+            >
+                <ui-submittaskform
+                    runscript="tasks.system.export.exportreleasetables.ExportReleaseTables"
+                    program-name="ExportReleaseTables"
+                    program-type="Script"
+                 >
+                 </ui-submittaskform>
+            </ui-step>
+        </ui-stepper>
+</div>

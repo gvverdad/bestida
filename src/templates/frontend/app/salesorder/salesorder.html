@@ -1,0 +1,50 @@
+<div data-title="Sales Order Entry"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Sales Order Entry"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Customer"
+                data-panel=""
+                active-page
+            >
+                {% include "./app/salesorder/customer.html" %}
+            </ui-step>
+            <ui-step
+                step-title="Header"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Defaults"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Addresses"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Comments"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Lines"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Extras"
+                data-panel=""
+            >
+            </ui-step>
+            <ui-step
+                step-title="Totals"
+                data-panel=""
+            >
+            </ui-step>
+        </ui-stepper>
+</div>

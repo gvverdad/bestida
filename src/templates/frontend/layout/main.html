@@ -1,0 +1,28 @@
+{% extends "./base.html" %}
+
+{% block header_scripts %}
+    <script src="{{ url_for('static', path='/3rd/js/html2pdf/dist/html2pdf.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', path='/dist/app.bundle.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+{% if change_password %}
+<div id="initPassword" style="display: none;"></div>
+{% endif %}
+<div class="drawer">
+    <input id="menu-drawer" type="checkbox" class="drawer-toggle" />
+    <ui-toaster data-toaster></ui-toaster>
+    <div class="drawer-content flex-1 flex flex-col overflow-hidden">
+        {% include "./layout/header.html" %}
+        {% include "./menu/breadcrumbs.html" %}
+        <main data-main_container
+              class="flex-1 flex flex justify-center items-center overflow-auto">
+        </main>
+        {% include "./layout/footer.html" %}
+    </div>
+    <div class="drawer-side z-[99]">
+        <label for="menu-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+        {% include "./menu/main_menu.html" %}
+  </div>
+</div>
+{% endblock %}

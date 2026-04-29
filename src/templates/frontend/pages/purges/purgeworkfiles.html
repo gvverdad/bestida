@@ -1,0 +1,71 @@
+<div data-title="Purge Workfiles"
+     class="flex flex-col justify-center items-center w-full h-full">
+        <ui-stepper
+            stepper-title="Purge Workfiles"
+            db-table="Tasks"
+            class="w-full overflow-y-auto"
+        >
+            <ui-step
+                step-title="Rulesets"
+                data-panel=""
+                active-page
+                fetch-data
+            >
+                <div class="flex flex-col justify-center items-center w-full h-full">
+                    <ui-datatable
+                        grid-title="Rulesets"
+                        db-table="Rulesets"
+                        program="PurgeWorkfiles.Rulesets"
+                        get-schema-url="/purgeworkfilesgridschema"
+                        post-data-url="/purgeworkfilesrulesets"
+                        select-row
+                        form-mode
+                        next-button-text="New"
+                        next-button-select-text="Update"
+                        active-next-button
+                        delete-button
+                        filter-button
+                        column-button
+                        refresh-button
+                        download-button
+                        print-button
+
+                    ></ui-datatable>
+                </div>
+            </ui-step>
+            <ui-step
+                step-title="Ruleset"
+                data-panel=""
+            >
+                <ui-form
+                    form-title="Purge Workfiles Ruleset"
+                >
+                    <ui-input label="Title"
+                        name="Title"
+                        type="text"
+                        maxlength="128"
+                        required="Title is a Required Field"
+                        autofocus
+                    ></ui-input>
+                    <ui-input label="Days to Retain"
+                              type="number" field-type="Integer"
+                              name="Params.days"
+                              required="Days to Retain is a Required Field"
+                              validator='["ZeroPositive"]'
+                              zero-positive-message="Days to Retain requires a zero or +ve value"
+                    ></ui-input>
+                </ui-form>
+            </ui-step>
+            <ui-step
+                step-title="Task"
+                data-panel=""
+            >
+                <ui-submittaskform
+                    runscript="tasks.system.workfile.purgeworkfiles.PurgeWorkfile"
+                    program-name="PurgeWorkfiles"
+                    program-type="Script"
+                 >
+                 </ui-submittaskform>
+            </ui-step>
+        </ui-stepper>
+</div>
