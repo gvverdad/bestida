@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, Index
 from sqlalchemy.orm import relationship
 
 from ..address.Emails import Email
@@ -7,7 +7,13 @@ from ..address.Emails import Email
 class PersonEmail(Email):
     __versioned__ = {}
     __tablename__ = "PersonEmails"
-    __table_args__ = dict(info=dict(label="Person Emails", desc="Emails"))
+    __table_args__ = dict(info=dict(label="Person Emails",
+                                    desc="Emails",
+                                    parentTables=[
+                                        dict(column="ItemPerson",
+                                             table="Persons")
+                                    ]
+                                    ))
         
     Id = Column(Integer, ForeignKey("Emails.Id"), primary_key=True,
                 nullable=False,
@@ -27,3 +33,6 @@ class PersonEmail(Email):
     # ManyToOne side of Person 
     ItemPerson_Id = Column(Integer, ForeignKey("Persons.Id"),
                            info=dict(hidden=True))
+
+Index("PersonEmail_Index1", PersonEmail.ItemPerson_Id,
+      PersonEmail.Type_Id, unique=True)

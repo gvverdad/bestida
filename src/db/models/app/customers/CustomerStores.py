@@ -160,7 +160,7 @@ class CustomerStore(Model):
                              backref="ItemCustomerStore",
                              cascade="all, delete-orphan",
                              info=dict(dumpFields=["Id"],
-                                       requiredEntry=dict(type="AddressType.Type",
+                                       requiredEntry=dict(type="Type.Type",
                                                           value=["MAIN"],
                                                           min=1),
                                        depth=1))

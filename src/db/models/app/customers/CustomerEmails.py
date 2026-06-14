@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, Index
 from sqlalchemy.orm import relationship
 
 from ...address.Emails import Email
@@ -7,7 +7,13 @@ from ...address.Emails import Email
 class CustomerEmail(Email):
     __versioned__ = {}
     __tablename__ = "CustomerEmails"
-    __table_args__ = dict(info=dict(label="Customer Emails", desc="Emails"))
+    __table_args__ = dict(info=dict(label="Customer Emails",
+                                    desc="Emails",
+                                    parentTables=[
+                                        dict(column="ItemCustomer",
+                                             table="Customers")
+                                    ]
+                                    ))
         
     Id = Column(Integer, ForeignKey("Emails.Id"), primary_key=True, nullable=False,
                 info=dict(hidden=True))
@@ -33,3 +39,6 @@ class CustomerEmail(Email):
                                                            "ModifiedTimeStamp", "ModifiedOpId_Id", "ModifiedOpId",
                                                            "versions"],
                                        ))
+
+Index("CustomerEmail_Index1", CustomerEmail.ItemCustomer_Id,
+      CustomerEmail.Type_Id, unique=True)

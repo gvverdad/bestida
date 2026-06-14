@@ -528,9 +528,15 @@ class ImportTables extends LitElement {
             "modifiable": true
         });
 console.log("importtables.populate_fields:", ele, panels);
-        const panel = panels.find(pane => pane.table === ele.table)
+        const panel = panels.find(pane => pane.table === ele.table);
+        let label = null;
+        if(panel) {
+            label = panel.label || panel.desc;
+            this.currentLabel = label;
+        } else {
+            label = `${this.currentLabel} - ${ele.table}`;
+        }
 
-        const label = panel ? panel.label || panel.desc : ele.table;
         this.mapGridData.push({
             "Id": row_idx,
             "table_name": label,
@@ -547,7 +553,8 @@ console.log("importtables.populate_fields:", ele, panels);
             'table': ele.table,
             'type': ele.type,
             'join_list': ele.join_list,
-            'select_key': ele.selectKey
+            'select_key': ele.selectKey,
+            'select_field': ele.selectField
         });
     }
 

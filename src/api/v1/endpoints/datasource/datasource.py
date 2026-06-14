@@ -756,12 +756,12 @@ async def upload_file(file: UploadFile = File(...),
         except Exception as err:
             raise HTTPException(400, str(err))
 
-    ext = file.filename.rsplit('.', 1)[-1]
-    file_name = get_work_filename(config) + '.' + ext
     # Note that we are generating our own filename instead of trusting
     # the incoming filename since that might result in insecure paths.
+    ext = file.filename.rsplit('.', 1)[-1]
+    file_name = get_work_filename(config) + '.' + ext
     with open(file_name, "wb+") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+        buffer.write(contents)
 
     return UploadFileResult(filenames=[file_name],
                             formats=[mime])

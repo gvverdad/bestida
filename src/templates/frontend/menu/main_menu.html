@@ -1,5 +1,5 @@
-<div class="flex flex-col p-4 w-fit min-h-full bg-base-200 text-base-content">
-    <div class="flex flex-col items-center mt-2 mb-6">
+<div class="flex flex-col p-4 w-max h-screen bg-base-200 text-base-content">
+    <div class="flex flex-col items-center mt-2 mb-6 shrink-0">
         <div class="avatar">
                 <div class="w-24 rounded">
                     <a href="/profile" data-link>
@@ -10,40 +10,42 @@
         <h4 class="mx-2 mt-2 text-xl font-medium"><span data-user_name></span></h4>
         <p class="mx-2 mt-1 text-sm font-medium"><span data-user_group_role></span></p>
     </div>
-    <ul data-main_menu class="menu text-lg font-medium">
-    {% if bookmark_menu is defined and bookmark_menu|length > 0 %}
-        <li>
-        <details id="menu-bookmarks" data-menu
-            {% if menu_state and "bookmarks" in menu_state %} open {% endif %}>
-            <summary>Bookmarks</summary>
-            <ul>
-            {% for bookmark in bookmark_menu %}
-                {% if not bookmark.home_page %}
-                    <li><a href="{{ bookmark.url }}" data-link data-bookmark>{{ bookmark.title }}</a></li>
-                {% endif %}
-            {% endfor %}
-            </ul>
-        </details>
-        </li>
-    {% endif %}
-    {% if main_menu is defined and main_menu|length > 0 %}
-        {%- for menu in main_menu recursive %}
+    <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <ul data-main_menu class="menu text-lg font-medium">
+        {% if bookmark_menu is defined and bookmark_menu|length > 0 %}
             <li>
-            {% if menu.type == "Menu"  %}
-                {% if menu.items %}
+            <details id="menu-bookmarks" data-menu
+                {% if menu_state and "bookmarks" in menu_state %} open {% endif %}>
+                <summary>Bookmarks</summary>
+                <ul>
+                {% for bookmark in bookmark_menu %}
+                    {% if not bookmark.home_page %}
+                        <li><a href="{{ bookmark.url }}" data-link data-bookmark>{{ bookmark.title }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+            </details>
+            </li>
+        {% endif %}
+        {% if main_menu is defined and main_menu|length > 0 %}
+            {%- for menu in main_menu recursive %}
+            <li>
+                {% if menu.type == "Menu"  %}
+                    {% if menu.items %}
                 <details id="menu-{{ menu.id }}" data-menu
                     {% if menu_state and menu.id in menu_state %} open {% endif %}>
                     <summary>{{ menu.title }}</summary>
                     <ul>{{ loop(menu.items) }}</ul>
                 </details>
+                    {% else %}
+                        {{ menu.title }}
+                    {% endif %}
                 {% else %}
-                    {{ menu.title }}
-                {% endif %}
-            {% else %}
                 <a href="{{ menu.url }}" data-link>{{ menu.title }}</a>
-            {% endif %}
+                {% endif %}
             </li>
-        {%- endfor %}
-    {% endif %}
-    </ul>
+            {%- endfor %}
+        {% endif %}
+        </ul>
+    </div>
 </div>

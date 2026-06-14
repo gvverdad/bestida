@@ -1,4 +1,4 @@
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, Index
 from sqlalchemy.orm import relationship
 
 from ...person.Persons import Person
@@ -7,8 +7,14 @@ from ...person.Persons import Person
 class SupplierStoreContact(Person):
     __versioned__ = {}
     __tablename__ = "SupplierStoreContacts"
-    __table_args__ = dict(info=dict(label="Supplier Store Contacts", desc="Contacts",
-                                    stepperTitleFields=["Type.Type", "LastName"]))
+    __table_args__ = dict(info=dict(label="Supplier Store Contacts",
+                                    desc="Contacts",
+                                    stepperTitleFields=["Type.Type", "LastName"],
+                                    parentTables=[
+                                        dict(column="ItemSupplierStore",
+                                             table="SupplierStores")
+                                    ]
+                                    ))
         
     Id = Column(Integer, ForeignKey("Persons.Id"), primary_key=True,
                 nullable=False,
@@ -36,3 +42,5 @@ class SupplierStoreContact(Person):
                                                                 "versions"],
                                             ))
 
+Index("SupplierStoreContact_Index1", SupplierStoreContact.ItemSupplierStore_Id,
+      SupplierStoreContact.Type_Id, unique=True)

@@ -1,5 +1,6 @@
 import logging
 from enum import Enum
+from ast import literal_eval
 from typing import List, Optional, Dict, Any
 
 from pydantic import BaseModel
@@ -528,6 +529,12 @@ def grid_schema(schema, table_name, grid_tables, main_table,
     except:
         grid_column_header = "column_label"
 
+    try:
+        # ConfigParser defaults to string
+        grid_field_exceptions = literal_eval(config["grid_default_field_display"]["exceptions"])
+    except:
+        grid_field_exceptions = None
+
     scheme = list()
     for s in schema:
         if not s["displayable"]:
@@ -636,6 +643,10 @@ def grid_schema(schema, table_name, grid_tables, main_table,
                         grid_scheme["draggable"] = sc["draggable"]
                         grid_scheme["visible"] = True
                         grid_scheme["table"] = sc["table"]
+                        if grid_field_exceptions and (sc["name"].startswith(grid_field_exceptions) or
+                                                      grid_scheme["field_name"].startswith(grid_field_exceptions)):
+                            grid_scheme["visible"] = False
+
                         scheme.append(grid_scheme)
         else:
             if sum_groups and name not in sum_groups:
@@ -662,6 +673,10 @@ def grid_schema(schema, table_name, grid_tables, main_table,
                     grid_scheme["sortable"] = False
                 if sum_fields and name in sum_fields:
                     grid_scheme["sticky"] = True
+                if grid_field_exceptions and (s["name"].startswith(grid_field_exceptions) or
+                                              grid_scheme["field_name"].startswith(grid_field_exceptions)):
+                    grid_scheme["visible"] = False
+
                 scheme.append(grid_scheme)
 
     return scheme

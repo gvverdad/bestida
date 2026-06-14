@@ -4887,8 +4887,12 @@ details.collapse summary::-webkit-details-marker {
   height: 100vh;
 }
 
-.min-h-full {
-  min-height: 100%;
+.max-h-\\[90vh\\] {
+  max-height: 90vh;
+}
+
+.min-h-0 {
+  min-height: 0px;
 }
 
 .w-1\\/2 {
@@ -4955,6 +4959,10 @@ details.collapse summary::-webkit-details-marker {
 
 .flex-1 {
   flex: 1 1 0%;
+}
+
+.shrink-0 {
+  flex-shrink: 0;
 }
 
 .table-auto {
